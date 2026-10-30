@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài Liệu Ôn Tập 8 - Cổng Ôn Thi Trực Tuyến</title>
+    <title>Tài Liệu Ôn Tập 8 - Ôn Thi Trực Tuyến</title>
     <!-- Favicon (Ảnh 1) -->
-    <link rel="icon" type="image/svg+xml" href="https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png">
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -79,9 +79,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             <!-- Brand (Ảnh 2) -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('study')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <!-- Ảnh Logo Header -->
+                <img id="headerLogoImg" src="" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-lg shadow-indigo-500/30 hidden">
+                
+                <!-- Icon dự phòng -->
+                <div id="headerLogoFallback" class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
                     <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
                 </div>
+
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-bold tracking-tight text-slate-900">Tài Liệu Ôn Tập 8</h1>
@@ -93,7 +98,7 @@
                 </div>
             </div>
 
-            <!-- Search & Navigation Actions (Đã xóa phần Ảnh 3) -->
+            <!-- Search & Navigation Actions -->
             <div class="flex items-center gap-2.5 sm:gap-3">
                 <!-- Quick Search -->
                 <div class="relative hidden md:block w-64">
@@ -463,10 +468,10 @@
                 </div>
                 
                 <div class="relative z-10 flex flex-col items-center">
-                    <!-- Ảnh Logo (Bạn có thể thay link ảnh thật vào src) -->
+                    <!-- Ảnh Thông Báo -->
                     <img id="notiLogoImg" src="" alt="TLOT8 Logo" class="w-24 h-24 rounded-2xl mx-auto mb-3 shadow-lg object-cover border-2 border-white/20 hidden" onerror="this.classList.add('hidden'); document.getElementById('notiFallbackIcon').classList.remove('hidden'); document.getElementById('notiFallbackIcon').classList.add('flex');">
                     
-                    <!-- Icon dự phòng nếu không có ảnh -->
+                    <!-- Icon dự phòng -->
                     <div id="notiFallbackIcon" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex">
                         <i data-lucide="bell" class="w-10 h-10 text-white"></i>
                     </div>
@@ -513,10 +518,11 @@
         // ============================================================================
         // CONFIGURATION
         // ============================================================================
-        const FIREBASE_DB_URL = "https://console.firebase.google.com/project/tailieuontap8/database/tailieuontap8-default-rtdb/data/~2F";
+        // SỬA LỖI 1: Đã thay bằng link API Realtime Database thực tế
+        const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.firebaseio.com";
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1565660693959675954/2AFAcHeof5PHT0M7tOF2kCoNBIYiwQS42dPAdKpNtoSGXMW28qSwCqRwgPlmVIlqvhhs";
 
-        // 👉 BẠN HÃY THAY LINK ẢNH CỦA BẠN VÀO ĐÂY (Nếu không có, hãy để trống "")
+        const HEADER_LOGO_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
         const NOTI_IMAGE_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
 
         const LOCAL_STORAGE_DOCS_KEY = "tailieuontap8_docs_v1";
@@ -524,13 +530,9 @@
         const LOCAL_STORAGE_NOTI_KEY = "tailieuontap8_noti_v1";
         const LOCAL_STORAGE_AUTH_KEY = "tailieuontap8_auth_v1";
 
-        // Mã hóa tài khoản Admin (Base64)
-        // Tlot8Admin -> VGxvdDhBZG1pbg==
-        // Tlot8Admin@12345 -> VGxvdDhBZG1pbkAxMjM0NQ==
         const ADMIN_USER_HASH = "VGxvdDhBZG1pbg==";
         const ADMIN_PASS_HASH = "VGxvdDhBZG1pbkAxMjM0NQ==";
 
-        // 7 Standard Subjects
         const SUBJECTS = [
             { id: "Lịch Sử và Địa Lí", name: "Lịch Sử và Địa Lí", shortName: "Sử - Địa", icon: "compass", color: "amber", badgeClass: "bg-amber-100 text-amber-700 border-amber-200", iconBg: "bg-amber-50 text-amber-600 border-amber-200" },
             { id: "Toán", name: "Toán", shortName: "Toán Học", icon: "calculator", color: "blue", badgeClass: "bg-blue-100 text-blue-700 border-blue-200", iconBg: "bg-blue-50 text-blue-600 border-blue-200" },
@@ -541,7 +543,6 @@
             { id: "Tiếng Anh", name: "Tiếng Anh", shortName: "Tiếng Anh", icon: "languages", color: "violet", badgeClass: "bg-violet-100 text-violet-700 border-violet-200", iconBg: "bg-violet-50 text-violet-600 border-violet-200" }
         ];
 
-        // State
         let studyDocuments = [];
         let errorReports = [];
         let selectedSubjectFilter = "ALL";
@@ -555,6 +556,7 @@
         // ============================================================================
         window.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
+            applyCustomImages();
             setDefaultAdminExpirationDateTime();
             checkAdminSession();
             loadLocalCache();
@@ -562,16 +564,28 @@
             renderStudyMaterials();
             renderAdminLists();
 
-            // Fetch data
+            // Tải dữ liệu lần đầu
             syncFromFirebase(false);
-            fetchNotification(); // Gọi hàm lấy thông báo ngay khi tải trang
+            fetchNotification(); 
 
-            // Auto-check expiration
+            // SỬA LỖI 2: Tự động đồng bộ ngầm mỗi 7 giây (Auto Update)
             setInterval(() => {
-                checkAndPurgeExpiredDocuments();
+                syncFromFirebase(false); // Cập nhật tài liệu mới
+                fetchNotification();     // Cập nhật thông báo mới
+                checkAndPurgeExpiredDocuments(); // Dọn rác
                 updateLiveCountdowns();
-            }, 15000);
+            }, 7000);
         });
+
+        function applyCustomImages() {
+            if (HEADER_LOGO_URL && HEADER_LOGO_URL.trim() !== "") {
+                const img = document.getElementById("headerLogoImg");
+                img.src = HEADER_LOGO_URL;
+                img.classList.remove("hidden");
+                document.getElementById("headerLogoFallback").classList.add("hidden");
+                document.getElementById("headerLogoFallback").classList.remove("flex");
+            }
+        }
 
         function setDefaultAdminExpirationDateTime() {
             const dateInput = document.getElementById("adminDeleteDate");
@@ -608,27 +622,25 @@
         // NOTIFICATION SYSTEM
         // ============================================================================
         async function fetchNotification() {
-            // 1. Hiển thị ngay từ LocalStorage (nếu có) để không bị chậm
-            if (currentNotification && currentNotification.content) {
-                showNotificationModal(currentNotification.content);
-            }
-
-            // 2. Tải bản mới nhất từ Firebase
             try {
-                const res = await fetch(`${FIREBASE_DB_URL}/notification.json`);
+                // SỬA LỖI 3: Thêm ?t=Date.now() để chống lưu Cache trên điện thoại
+                const res = await fetch(`${FIREBASE_DB_URL}/notification.json?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data.content) {
-                        // Nếu có thông báo mới từ Firebase khác với bộ nhớ tạm, cập nhật và hiển thị
                         if (!currentNotification || currentNotification.content !== data.content) {
                             currentNotification = data;
                             saveLocalCache();
+                            // Chỉ hiện popup nếu nội dung thực sự thay đổi
                             showNotificationModal(data.content);
                         }
                     }
                 }
             } catch (e) {
-                console.log("Không thể tải thông báo từ Firebase.");
+                // Nếu mất mạng, hiển thị thông báo cũ trong máy
+                if (currentNotification && currentNotification.content) {
+                    showNotificationModal(currentNotification.content);
+                }
             }
         }
 
@@ -642,7 +654,6 @@
 
             contentEl.textContent = content;
 
-            // Xử lý hiển thị ảnh
             if (NOTI_IMAGE_URL && NOTI_IMAGE_URL.trim() !== "") {
                 imgEl.src = NOTI_IMAGE_URL;
                 imgEl.classList.remove("hidden");
@@ -673,9 +684,9 @@
 
             const payload = { content, updatedAt: Date.now() };
 
-            // Lưu ngay vào LocalStorage để đảm bảo F5 lên vẫn có
             currentNotification = payload;
             saveLocalCache();
+            showNotificationModal(content); // Hiện ngay lập tức cho admin xem
 
             try {
                 await fetch(`${FIREBASE_DB_URL}/notification.json`, {
@@ -757,9 +768,10 @@
         // ============================================================================
         async function syncFromFirebase(showNotification = false) {
             try {
+                // SỬA LỖI 4: Thêm ?t=Date.now() vào link fetch để trình duyệt điện thoại không lấy dữ liệu cũ (Cache)
                 const [docsRes, reportsRes] = await Promise.all([
-                    fetch(`${FIREBASE_DB_URL}/documents.json`),
-                    fetch(`${FIREBASE_DB_URL}/reports.json`)
+                    fetch(`${FIREBASE_DB_URL}/documents.json?t=${Date.now()}`),
+                    fetch(`${FIREBASE_DB_URL}/reports.json?t=${Date.now()}`)
                 ]);
 
                 if (docsRes.ok) {
@@ -794,10 +806,8 @@
 
                 if (showNotification) showToast("Đã đồng bộ dữ liệu mới nhất!", "success");
             } catch (err) {
+                // Nếu rớt mạng, vẫn hiển thị dữ liệu từ LocalStorage
                 await checkAndPurgeExpiredDocuments();
-                renderSubjectTabs();
-                renderStudyMaterials();
-                renderAdminLists();
             }
         }
 
@@ -1242,7 +1252,6 @@
 
             const reportData = { subject, studentName, studentClass, content, docTitle: currentViewingDoc ? currentViewingDoc.title : "Chung", createdAt: Date.now() };
 
-            // Discord
             try {
                 await fetch(DISCORD_WEBHOOK_URL, {
                     method: "POST",
@@ -1264,7 +1273,6 @@
                 });
             } catch (e) {}
 
-            // Firebase
             try {
                 const fbRes = await fetch(`${FIREBASE_DB_URL}/reports.json`, {
                     method: "POST",

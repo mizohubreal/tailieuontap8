@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài Liệu Ôn Tập 8 - Cổng Ôn Thi Trực Tuyến</title>
+    <!-- Favicon (Ảnh 1) -->
+    <link rel="icon" type="image/svg+xml" href="https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .glass-panel {
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2e8f0;
+        }
+        .subject-card-hover {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .subject-card-hover:hover {
+            transform: translateY(-2px);
+            border-color: #818cf8;
+            box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand (Ảnh 2) -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('study')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold tracking-tight text-slate-900">Tài Liệu Ôn Tập 8</h1>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-200">
+                            Khối 8
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 hidden sm:block">Hệ thống ôn tập trực tuyến theo từng bộ môn</p>
+                </div>
+            </div>
+
+            <!-- Search & Navigation Actions (Đã xóa phần Ảnh 3) -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <!-- Quick Search -->
+                <div class="relative hidden md:block w-64">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input 
+                        id="searchInput" 
+                        type="text" 
+                        oninput="renderStudyMaterials()"
+                        placeholder="Tìm bài ôn, môn học..." 
+                        class="w-full pl-9 pr-3.5 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                    >
+                </div>
+
+                <!-- Switch View Buttons -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button 
+                        id="navStudyBtn"
+                        onclick="switchMainView('study')" 
+                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-white text-indigo-600 shadow-sm transition"
+                    >
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        <span>Góc Ôn Tập</span>
+                    </button>
+                    <button 
+                        id="navAdminBtn"
+                        onclick="openAdminLogin()" 
+                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                    >
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span>Quyền Admin</span>
+                        <span id="adminReportBadge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-semibold">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ==================== VIEW 1: STUDENT STUDY PORTAL ==================== -->
+        <section id="studyView" class="space-y-6">
+            
+            <!-- Mobile Search -->
+            <div class="md:hidden relative">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <input 
+                    id="mobileSearchInput" 
+                    type="text" 
+                    oninput="syncMobileSearch(this.value)"
+                    placeholder="Tìm kiếm tài liệu ôn tập..." 
+                    class="w-full pl-9 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-sm"
+                >
+            </div>
+
+            <!-- Subject Categories Bar -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i>
+                        Danh Mục Môn Học (7 Môn)
+                    </h2>
+                    <span id="totalDocsCounter" class="text-xs text-slate-500">Đang tải tài liệu...</span>
+                </div>
+
+                <div id="subjectTabsContainer" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+                    <!-- Rendered dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Selected Subject Banner -->
+            <div id="currentSubjectBanner" class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div id="bannerIconBox" class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                        <i data-lucide="layout-grid" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 id="bannerTitle" class="text-base sm:text-lg font-bold text-slate-900">Tất cả các môn học</h3>
+                        <p id="bannerSub" class="text-xs sm:text-sm text-slate-500">Chọn một môn học bên trên hoặc bấm trực tiếp vào bài ôn để bắt đầu làm bài.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-center">
+                    <button onclick="openErrorReportModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition">
+                        <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                        <span>Báo lỗi tài liệu</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Study Materials -->
+            <div id="materialsContainer" class="space-y-8"></div>
+        </section>
+
+        <!-- ==================== VIEW 2: ADMIN PANEL ==================== -->
+        <section id="adminView" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left Column: Upload & Notification -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Upload Form -->
+                    <div class="glass-panel rounded-2xl p-5 sm:p-6">
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                                    <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Đăng Tải Tài Liệu</h2>
+                                    <p class="text-xs text-slate-500">Đưa file HTML lên web & hẹn giờ tự động xóa</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="adminUploadForm" onsubmit="handleAdminUpload(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Môn: <span class="text-rose-500">*</span></label>
+                                <select id="adminSubject" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 transition">
+                                    <option value="Lịch Sử và Địa Lí">Lịch Sử và Địa Lí</option>
+                                    <option value="Toán">Toán</option>
+                                    <option value="Ngữ Văn">Ngữ Văn</option>
+                                    <option value="Công Nghệ">Công Nghệ</option>
+                                    <option value="Tin Học">Tin Học</option>
+                                    <option value="Khoa Học Tự Nhiên">Khoa Học Tự Nhiên</option>
+                                    <option value="Tiếng Anh">Tiếng Anh</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Tiêu đề (Tùy chọn):</label>
+                                <input type="text" id="adminDocTitle" placeholder="VD: Đề cương ôn tập Giữa kì 1..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Nội dung (File HTML): <span class="text-rose-500">*</span></label>
+                                <label for="adminHtmlFile" class="flex flex-col items-center justify-center w-full p-5 border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-2xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition text-center">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2">
+                                        <i data-lucide="file-code" class="w-5 h-5"></i>
+                                    </div>
+                                    <p id="selectedFileName" class="text-sm font-medium text-slate-700">Bấm để chọn hoặc kéo thả file <span class="text-indigo-600">.html</span> vào đây</p>
+                                    <p id="selectedFileSize" class="text-xs text-slate-500 mt-1">Hỗ trợ đầy đủ CSS/JS bên trong file HTML</p>
+                                    <input id="adminHtmlFile" type="file" accept=".html,.htm" class="hidden" onchange="handleFileSelect(event)">
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Ngày xóa: <span class="text-rose-500">*</span></label>
+                                    <input type="date" id="adminDeleteDate" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Giờ xóa: <span class="text-rose-500">*</span></label>
+                                    <input type="time" id="adminDeleteTime" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 transition">
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex items-center gap-2.5">
+                                <button type="button" onclick="previewSelectedHtmlBeforeUpload()" id="previewDraftBtn" disabled class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition flex items-center gap-1.5 shadow-sm">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                    <span>Xem thử</span>
+                                </button>
+                                <button type="submit" id="uploadSubmitBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span>Đăng Lên Web</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Form Gửi Thông Báo -->
+                    <div class="glass-panel rounded-2xl p-5 sm:p-6">
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                                    <i data-lucide="bell" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Cập Nhật Thông Báo</h2>
+                                    <p class="text-xs text-slate-500">Gửi thông báo hiển thị cho học sinh</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form id="adminNotiForm" onsubmit="handleUpdateNotification(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Nội dung thông báo: <span class="text-rose-500">*</span></label>
+                                <textarea id="adminNotiContent" rows="4" required placeholder="Nhập nội dung thông báo..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2 transition">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                                <span>Gửi Thông Báo</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Manage Docs & Reports -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="glass-panel rounded-2xl p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <button id="adminSubTabDocs" onclick="switchAdminSubTab('docs')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition shadow-sm">
+                                    Tài liệu (<span id="adminDocCount">0</span>)
+                                </button>
+                                <button id="adminSubTabReports" onclick="switchAdminSubTab('reports')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                                    <span>Báo lỗi</span>
+                                    <span id="adminReportCount" class="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-600 border border-rose-200">0</span>
+                                </button>
+                            </div>
+                            <button onclick="logoutAdmin()" class="text-xs text-rose-500 hover:text-rose-700 font-medium flex items-center gap-1">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Đăng xuất
+                            </button>
+                        </div>
+
+                        <div id="adminDocsListWrapper" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
+                        <div id="adminReportsListWrapper" class="hidden space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL 1: HTML VIEWER ==================== -->
+    <div id="htmlViewerModal" class="fixed inset-0 z-40 hidden flex-col bg-slate-50">
+        <div class="h-14 px-4 sm:px-6 bg-white border-b border-slate-200 flex items-center justify-between gap-3 shrink-0 shadow-sm">
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="closeStudyViewer()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1.5 text-xs font-medium shrink-0">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Quay lại</span>
+                </button>
+                <span id="viewerSubjectBadge" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200 shrink-0">Môn học</span>
+                <h3 id="viewerDocTitle" class="text-sm sm:text-base font-bold text-slate-900 truncate">Tiêu đề tài liệu</h3>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <div id="viewerExpireBadge" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-600">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span id="viewerExpireText">--</span>
+                </div>
+                <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? currentViewingDoc.title : null)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                    <span>Báo lỗi</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="relative flex-1 w-full bg-white overflow-hidden">
+            <iframe id="studyHtmlIframe" title="Nội dung ôn tập" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+            <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? currentViewingDoc.title : null)" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-950/30 border border-rose-400/40 transition transform hover:scale-105 active:scale-95">
+                <i data-lucide="bug" class="w-4 h-4"></i>
+                <span>Báo lỗi môn này</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: BÁO LỖI ==================== -->
+    <div id="errorReportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600">
+                        <i data-lucide="flag" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Báo Lỗi Tài Liệu</h3>
+                        <p class="text-xs text-slate-500">Gửi trực tiếp về Admin & Discord</p>
+                    </div>
+                </div>
+                <button onclick="closeErrorReportModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="errorReportForm" onsubmit="submitErrorReport(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Môn: <span class="text-rose-500">*</span></label>
+                    <select id="reportSubject" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500 transition">
+                        <option value="Lịch Sử và Địa Lí">Lịch Sử và Địa Lí</option>
+                        <option value="Toán">Toán</option>
+                        <option value="Ngữ Văn">Ngữ Văn</option>
+                        <option value="Công Nghệ">Công Nghệ</option>
+                        <option value="Tin Học">Tin Học</option>
+                        <option value="Khoa Học Tự Nhiên">Khoa Học Tự Nhiên</option>
+                        <option value="Tiếng Anh">Tiếng Anh</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Tên Học Sinh: <span class="text-rose-500">*</span></label>
+                        <input type="text" id="reportStudentName" required placeholder="Nhập họ và tên..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Lớp: <span class="text-rose-500">*</span></label>
+                        <select id="reportStudentClass" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500 transition">
+                            <option value="8/10">8/10</option>
+                            <option value="8/11">8/11</option>
+                            <option value="8/12">8/12</option>
+                            <option value="8/13">8/13</option>
+                            <option value="8/14">8/14</option>
+                            <option value="8/15">8/15</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Nội dung báo lỗi: <span class="text-rose-500">*</span></label>
+                    <textarea id="reportContent" rows="4" required placeholder="Ghi rõ lỗi cần khắc phục..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500 transition resize-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeErrorReportModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 transition">Hủy</button>
+                    <button type="submit" id="submitReportBtn" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-semibold shadow-md shadow-rose-600/20 flex items-center gap-2 transition">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Gửi Báo Lỗi</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: ADMIN LOGIN ==================== -->
+    <div id="adminLoginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-600">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Đăng Nhập Admin</h3>
+                        <p class="text-xs text-slate-500">Dành riêng cho quản trị viên</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminLogin()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Tài khoản:</label>
+                    <input type="text" id="adminUsername" required placeholder="Nhập tên đăng nhập..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Mật khẩu:</label>
+                    <input type="password" id="adminPassword" required placeholder="Nhập mật khẩu..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Đăng Nhập</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 4: THÔNG BÁO (NOTIFICATION) ==================== -->
+    <div id="notificationModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            <!-- Header -->
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center relative overflow-hidden">
+                <!-- Hiệu ứng nền -->
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center">
+                    <i data-lucide="graduation-cap" class="w-48 h-48 text-white"></i>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <!-- Ảnh Logo (Bạn có thể thay link ảnh thật vào src) -->
+                    <img id="notiLogoImg" src="" alt="TLOT8 Logo" class="w-24 h-24 rounded-2xl mx-auto mb-3 shadow-lg object-cover border-2 border-white/20 hidden" onerror="this.classList.add('hidden'); document.getElementById('notiFallbackIcon').classList.remove('hidden'); document.getElementById('notiFallbackIcon').classList.add('flex');">
+                    
+                    <!-- Icon dự phòng nếu không có ảnh -->
+                    <div id="notiFallbackIcon" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex">
+                        <i data-lucide="bell" class="w-10 h-10 text-white"></i>
+                    </div>
+
+                    <h2 class="text-3xl font-black text-white tracking-wider" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">TLOT8</h2>
+                    <p class="text-sm font-semibold text-blue-100 uppercase tracking-widest mt-1">Thông Báo</p>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6 relative z-10 bg-white">
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-6">
+                    <p id="notificationContent" class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap font-medium">Chào mừng các bạn đến với hệ thống ôn tập TLOT8!</p>
+                </div>
+                
+                <!-- Footer -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+                    <p class="text-xs text-slate-500 font-medium">Make By: <span class="text-indigo-600 font-bold">Thai Minh</span></p>
+                    <button onclick="closeNotificationModal()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition transform hover:scale-105 active:scale-95">
+                        Đã hiểu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 py-6 mt-10 text-center text-xs text-slate-500 bg-white">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 <strong class="text-slate-700">Tài Liệu Ôn Tập 8</strong> — Hệ thống ôn tập trực tuyến Khối 8</p>
+            <p class="flex items-center gap-2">
+                <span>7 bộ môn chuẩn GDPT</span>
+                <span>•</span>
+                <span>Tự động dọn tài liệu hết hạn</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // ============================================================================
+        // CONFIGURATION
+        // ============================================================================
+        const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.firebaseio.com";
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1565660693959675954/2AFAcHeof5PHT0M7tOF2kCoNBIYiwQS42dPAdKpNtoSGXMW28qSwCqRwgPlmVIlqvhhs";
+
+        // 👉 BẠN HÃY THAY LINK ẢNH CỦA BẠN VÀO ĐÂY (Nếu không có, hãy để trống "")
+        const NOTI_IMAGE_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
+
+        const LOCAL_STORAGE_DOCS_KEY = "tailieuontap8_docs_v1";
+        const LOCAL_STORAGE_REPORTS_KEY = "tailieuontap8_reports_v1";
+        const LOCAL_STORAGE_NOTI_KEY = "tailieuontap8_noti_v1";
+        const LOCAL_STORAGE_AUTH_KEY = "tailieuontap8_auth_v1";
+
+        // Mã hóa tài khoản Admin (Base64)
+        // Tlot8Admin -> VGxvdDhBZG1pbg==
+        // Tlot8Admin@12345 -> VGxvdDhBZG1pbkAxMjM0NQ==
+        const ADMIN_USER_HASH = "VGxvdDhBZG1pbg==";
+        const ADMIN_PASS_HASH = "VGxvdDhBZG1pbkAxMjM0NQ==";
+
+        // 7 Standard Subjects
+        const SUBJECTS = [
+            { id: "Lịch Sử và Địa Lí", name: "Lịch Sử và Địa Lí", shortName: "Sử - Địa", icon: "compass", color: "amber", badgeClass: "bg-amber-100 text-amber-700 border-amber-200", iconBg: "bg-amber-50 text-amber-600 border-amber-200" },
+            { id: "Toán", name: "Toán", shortName: "Toán Học", icon: "calculator", color: "blue", badgeClass: "bg-blue-100 text-blue-700 border-blue-200", iconBg: "bg-blue-50 text-blue-600 border-blue-200" },
+            { id: "Ngữ Văn", name: "Ngữ Văn", shortName: "Ngữ Văn", icon: "feather", color: "rose", badgeClass: "bg-rose-100 text-rose-700 border-rose-200", iconBg: "bg-rose-50 text-rose-600 border-rose-200" },
+            { id: "Công Nghệ", name: "Công Nghệ", shortName: "Công Nghệ", icon: "cpu", color: "orange", badgeClass: "bg-orange-100 text-orange-700 border-orange-200", iconBg: "bg-orange-50 text-orange-600 border-orange-200" },
+            { id: "Tin Học", name: "Tin Học", shortName: "Tin Học", icon: "terminal", color: "cyan", badgeClass: "bg-cyan-100 text-cyan-700 border-cyan-200", iconBg: "bg-cyan-50 text-cyan-600 border-cyan-200" },
+            { id: "Khoa Học Tự Nhiên", name: "Khoa Học Tự Nhiên", shortName: "KHTN", icon: "flask-conical", color: "emerald", badgeClass: "bg-emerald-100 text-emerald-700 border-emerald-200", iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+            { id: "Tiếng Anh", name: "Tiếng Anh", shortName: "Tiếng Anh", icon: "languages", color: "violet", badgeClass: "bg-violet-100 text-violet-700 border-violet-200", iconBg: "bg-violet-50 text-violet-600 border-violet-200" }
+        ];
+
+        // State
+        let studyDocuments = [];
+        let errorReports = [];
+        let selectedSubjectFilter = "ALL";
+        let uploadedHtmlDraft = null;
+        let currentViewingDoc = null;
+        let currentNotification = null;
+        let isAdminAuthenticated = false;
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        window.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            setDefaultAdminExpirationDateTime();
+            checkAdminSession();
+            loadLocalCache();
+            renderSubjectTabs();
+            renderStudyMaterials();
+            renderAdminLists();
+
+            // Fetch data
+            syncFromFirebase(false);
+            fetchNotification(); // Gọi hàm lấy thông báo ngay khi tải trang
+
+            // Auto-check expiration
+            setInterval(() => {
+                checkAndPurgeExpiredDocuments();
+                updateLiveCountdowns();
+            }, 15000);
+        });
+
+        function setDefaultAdminExpirationDateTime() {
+            const dateInput = document.getElementById("adminDeleteDate");
+            const timeInput = document.getElementById("adminDeleteTime");
+            if (!dateInput || !timeInput) return;
+            const tomorrow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            const yyyy = tomorrow.getFullYear();
+            const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+            const dd = String(tomorrow.getDate()).padStart(2, "0");
+            dateInput.value = `${yyyy}-${mm}-${dd}`;
+            timeInput.value = "23:59";
+        }
+
+        function loadLocalCache() {
+            try {
+                const rawDocs = localStorage.getItem(LOCAL_STORAGE_DOCS_KEY);
+                if (rawDocs) studyDocuments = JSON.parse(rawDocs);
+                const rawReports = localStorage.getItem(LOCAL_STORAGE_REPORTS_KEY);
+                if (rawReports) errorReports = JSON.parse(rawReports);
+                const rawNoti = localStorage.getItem(LOCAL_STORAGE_NOTI_KEY);
+                if (rawNoti) currentNotification = JSON.parse(rawNoti);
+            } catch (e) {}
+        }
+
+        function saveLocalCache() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_DOCS_KEY, JSON.stringify(studyDocuments));
+                localStorage.setItem(LOCAL_STORAGE_REPORTS_KEY, JSON.stringify(errorReports));
+                if (currentNotification) localStorage.setItem(LOCAL_STORAGE_NOTI_KEY, JSON.stringify(currentNotification));
+            } catch (e) {}
+        }
+
+        // ============================================================================
+        // NOTIFICATION SYSTEM
+        // ============================================================================
+        async function fetchNotification() {
+            // 1. Hiển thị ngay từ LocalStorage (nếu có) để không bị chậm
+            if (currentNotification && currentNotification.content) {
+                showNotificationModal(currentNotification.content);
+            }
+
+            // 2. Tải bản mới nhất từ Firebase
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/notification.json`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.content) {
+                        // Nếu có thông báo mới từ Firebase khác với bộ nhớ tạm, cập nhật và hiển thị
+                        if (!currentNotification || currentNotification.content !== data.content) {
+                            currentNotification = data;
+                            saveLocalCache();
+                            showNotificationModal(data.content);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log("Không thể tải thông báo từ Firebase.");
+            }
+        }
+
+        function showNotificationModal(content) {
+            const modal = document.getElementById("notificationModal");
+            const contentEl = document.getElementById("notificationContent");
+            const imgEl = document.getElementById("notiLogoImg");
+            const fallbackIcon = document.getElementById("notiFallbackIcon");
+
+            if (!modal || !contentEl) return;
+
+            contentEl.textContent = content;
+
+            // Xử lý hiển thị ảnh
+            if (NOTI_IMAGE_URL && NOTI_IMAGE_URL.trim() !== "") {
+                imgEl.src = NOTI_IMAGE_URL;
+                imgEl.classList.remove("hidden");
+                fallbackIcon.classList.add("hidden");
+                fallbackIcon.classList.remove("flex");
+            } else {
+                imgEl.classList.add("hidden");
+                fallbackIcon.classList.remove("hidden");
+                fallbackIcon.classList.add("flex");
+            }
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeNotificationModal() {
+            const modal = document.getElementById("notificationModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        }
+
+        async function handleUpdateNotification(e) {
+            e.preventDefault();
+            const content = document.getElementById("adminNotiContent").value.trim();
+            if (!content) return;
+
+            const payload = { content, updatedAt: Date.now() };
+
+            // Lưu ngay vào LocalStorage để đảm bảo F5 lên vẫn có
+            currentNotification = payload;
+            saveLocalCache();
+
+            try {
+                await fetch(`${FIREBASE_DB_URL}/notification.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                showToast("Đã gửi thông báo thành công!", "success");
+                document.getElementById("adminNotiContent").value = "";
+            } catch (err) {
+                showToast("Đã lưu thông báo cục bộ (Lỗi Firebase).", "info");
+            }
+        }
+
+        // ============================================================================
+        // ADMIN AUTHENTICATION
+        // ============================================================================
+        function checkAdminSession() {
+            if (localStorage.getItem(LOCAL_STORAGE_AUTH_KEY) === "true") {
+                isAdminAuthenticated = true;
+                updateAdminUI();
+            }
+        }
+
+        function openAdminLogin() {
+            if (isAdminAuthenticated) {
+                switchMainView('admin');
+                return;
+            }
+            document.getElementById("adminLoginModal").classList.remove("hidden");
+            document.getElementById("adminLoginModal").classList.add("flex");
+        }
+
+        function closeAdminLogin() {
+            document.getElementById("adminLoginModal").classList.add("hidden");
+            document.getElementById("adminLoginModal").classList.remove("flex");
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById("adminUsername").value;
+            const pass = document.getElementById("adminPassword").value;
+
+            if (btoa(unescape(encodeURIComponent(user))) === ADMIN_USER_HASH && btoa(unescape(encodeURIComponent(pass))) === ADMIN_PASS_HASH) {
+                isAdminAuthenticated = true;
+                localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, "true");
+                closeAdminLogin();
+                updateAdminUI();
+                switchMainView('admin');
+                showToast("Đăng nhập Admin thành công!", "success");
+            } else {
+                showToast("Tài khoản hoặc mật khẩu không đúng!", "error");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            localStorage.removeItem(LOCAL_STORAGE_AUTH_KEY);
+            updateAdminUI();
+            switchMainView('study');
+            showToast("Đã đăng xuất khỏi quyền Admin.", "info");
+        }
+
+        function updateAdminUI() {
+            const navAdminBtn = document.getElementById("navAdminBtn");
+            if (isAdminAuthenticated) {
+                navAdminBtn.onclick = () => switchMainView('admin');
+                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Admin Panel</span><span id="adminReportBadge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-semibold">0</span>`;
+            } else {
+                navAdminBtn.onclick = openAdminLogin;
+                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Quyền Admin</span>`;
+            }
+            lucide.createIcons();
+            renderAdminLists();
+        }
+
+        // ============================================================================
+        // FIREBASE SYNC & AUTO-DELETE
+        // ============================================================================
+        async function syncFromFirebase(showNotification = false) {
+            try {
+                const [docsRes, reportsRes] = await Promise.all([
+                    fetch(`${FIREBASE_DB_URL}/documents.json`),
+                    fetch(`${FIREBASE_DB_URL}/reports.json`)
+                ]);
+
+                if (docsRes.ok) {
+                    const docsData = await docsRes.json();
+                    const parsedDocs = [];
+                    if (docsData && typeof docsData === "object") {
+                        for (const [key, val] of Object.entries(docsData)) {
+                            if (val && typeof val === "object") parsedDocs.push({ ...val, id: key });
+                        }
+                    }
+                    parsedDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    studyDocuments = parsedDocs;
+                }
+
+                if (reportsRes.ok) {
+                    const reportsData = await reportsRes.json();
+                    const parsedReports = [];
+                    if (reportsData && typeof reportsData === "object") {
+                        for (const [key, val] of Object.entries(reportsData)) {
+                            if (val && typeof val === "object") parsedReports.push({ ...val, id: key });
+                        }
+                    }
+                    parsedReports.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    errorReports = parsedReports;
+                }
+
+                await checkAndPurgeExpiredDocuments();
+                saveLocalCache();
+                renderSubjectTabs();
+                renderStudyMaterials();
+                renderAdminLists();
+
+                if (showNotification) showToast("Đã đồng bộ dữ liệu mới nhất!", "success");
+            } catch (err) {
+                await checkAndPurgeExpiredDocuments();
+                renderSubjectTabs();
+                renderStudyMaterials();
+                renderAdminLists();
+            }
+        }
+
+        async function checkAndPurgeExpiredDocuments() {
+            const now = Date.now();
+            const expiredDocs = studyDocuments.filter(doc => doc.deleteTimestamp && now >= Number(doc.deleteTimestamp));
+
+            if (expiredDocs.length === 0) return;
+
+            studyDocuments = studyDocuments.filter(doc => !doc.deleteTimestamp || now < Number(doc.deleteTimestamp));
+            saveLocalCache();
+
+            if (currentViewingDoc && expiredDocs.some(d => d.id === currentViewingDoc.id)) {
+                closeStudyViewer();
+                showToast("Tài liệu đang xem đã hết hạn và bị gỡ.", "info");
+            }
+
+            for (const expDoc of expiredDocs) {
+                try { await fetch(`${FIREBASE_DB_URL}/documents/${expDoc.id}.json`, { method: "DELETE" }); } catch (e) {}
+            }
+
+            renderSubjectTabs();
+            renderStudyMaterials();
+            renderAdminLists();
+        }
+
+        // ============================================================================
+        // RENDERING
+        // ============================================================================
+        function getSubjectMeta(subjectName) {
+            return SUBJECTS.find(s => s.id === subjectName) || SUBJECTS[0];
+        }
+
+        function selectSubject(subjectId) {
+            selectedSubjectFilter = subjectId;
+            renderSubjectTabs();
+            updateBannerForSubject(subjectId);
+            renderStudyMaterials();
+        }
+
+        function updateBannerForSubject(subjectId) {
+            const titleEl = document.getElementById("bannerTitle");
+            const subEl = document.getElementById("bannerSub");
+            const iconBox = document.getElementById("bannerIconBox");
+
+            if (subjectId === "ALL") {
+                titleEl.textContent = "Tất cả các môn học (7 Môn)";
+                subEl.textContent = "Các tài liệu được chia theo từng mục môn học tương ứng để bạn dễ dàng tra cứu và ôn luyện.";
+                iconBox.className = "w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0";
+                iconBox.innerHTML = `<i data-lucide="layout-grid" class="w-6 h-6"></i>`;
+            } else {
+                const meta = getSubjectMeta(subjectId);
+                const count = studyDocuments.filter(d => d.subject === subjectId).length;
+                titleEl.textContent = `Môn: ${meta.name}`;
+                subEl.textContent = `Hiện có ${count} tài liệu ôn tập trong mục ${meta.name}.`;
+                iconBox.className = `w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 ${meta.iconBg}`;
+                iconBox.innerHTML = `<i data-lucide="${meta.icon}" class="w-6 h-6"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        function renderSubjectTabs() {
+            const container = document.getElementById("subjectTabsContainer");
+            const totalCounter = document.getElementById("totalDocsCounter");
+            if (!container) return;
+
+            totalCounter.textContent = `Tổng cộng: ${studyDocuments.length} tài liệu đang mở`;
+            const allActive = selectedSubjectFilter === "ALL";
+            
+            let html = `
+                <button onclick="selectSubject('ALL')" class="flex items-center justify-between p-3 rounded-2xl border text-left transition ${allActive ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:shadow-sm'}">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-xl ${allActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'} flex items-center justify-center shrink-0">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        </div>
+                        <div class="truncate">
+                            <div class="text-xs font-bold truncate">Tất Cả</div>
+                            <div class="text-[11px] text-slate-500">${studyDocuments.length} bài</div>
+                        </div>
+                    </div>
+                </button>
+            `;
+
+            SUBJECTS.forEach(sub => {
+                const count = studyDocuments.filter(d => d.subject === sub.id).length;
+                const isActive = selectedSubjectFilter === sub.id;
+                html += `
+                    <button onclick="selectSubject('${sub.id}')" class="flex items-center justify-between p-3 rounded-2xl border text-left transition ${isActive ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:shadow-sm'}">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-xl border ${sub.iconBg} flex items-center justify-center shrink-0">
+                                <i data-lucide="${sub.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <div class="truncate">
+                                <div class="text-xs font-bold truncate">${sub.shortName}</div>
+                                <div class="text-[11px] text-slate-500">${count} bài</div>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function syncMobileSearch(val) {
+            const desktopInput = document.getElementById("searchInput");
+            if (desktopInput) desktopInput.value = val;
+            renderStudyMaterials();
+        }
+
+        function renderStudyMaterials() {
+            const container = document.getElementById("materialsContainer");
+            if (!container) return;
+
+            const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+            const subjectsToRender = selectedSubjectFilter === "ALL" ? SUBJECTS : SUBJECTS.filter(s => s.id === selectedSubjectFilter);
+
+            let html = "";
+
+            subjectsToRender.forEach(sub => {
+                const docsForSubject = studyDocuments.filter(doc => {
+                    const matchSub = doc.subject === sub.id;
+                    const matchQuery = !query || (doc.title && doc.title.toLowerCase().includes(query)) || (doc.fileName && doc.fileName.toLowerCase().includes(query));
+                    return matchSub && matchQuery;
+                });
+
+                html += `
+                    <div class="space-y-3.5">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl border ${sub.iconBg} flex items-center justify-center">
+                                    <i data-lucide="${sub.icon}" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="text-base font-bold text-slate-900">${sub.name}</h3>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">${docsForSubject.length} tài liệu</span>
+                            </div>
+                            <button onclick="openErrorReportModal('${sub.id}')" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition">
+                                <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                                <span>Báo lỗi</span>
+                            </button>
+                        </div>
+
+                        ${docsForSubject.length === 0 ? `
+                            <div class="bg-slate-50 rounded-2xl p-6 text-center border border-slate-200 border-dashed">
+                                <p class="text-xs sm:text-sm text-slate-500">Chưa có tài liệu ôn tập nào trong mục <strong>${sub.name}</strong>.</p>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${docsForSubject.map(doc => renderDocumentCard(doc, sub)).join("")}
+                            </div>
+                        `}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderDocumentCard(doc, subMeta) {
+            const countdownText = formatRemainingTime(doc.deleteTimestamp);
+            const safeTitle = escapeHtml(doc.title || doc.fileName || "Tài liệu ôn tập");
+            const safeFileName = escapeHtml(doc.fileName || "bai-on-tap.html");
+
+            return `
+                <div onclick="openStudyViewer('${doc.id}')" class="bg-white border border-slate-200 subject-card-hover rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4 cursor-pointer group shadow-sm">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${subMeta.badgeClass}">
+                                <i data-lucide="${subMeta.icon}" class="w-3.5 h-3.5"></i>
+                                <span>${subMeta.name}</span>
+                            </span>
+                            <span data-expire-ts="${doc.deleteTimestamp || ''}" class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg" title="Tự động xóa lúc ${escapeHtml(doc.deleteTime || '')} ngày ${escapeHtml(doc.deleteDate || '')}">
+                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                <span class="countdown-label">${countdownText}</span>
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition line-clamp-2">${safeTitle}</h4>
+                            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5 truncate">
+                                <i data-lucide="file-code" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                                <span class="truncate">${safeFileName}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div class="text-[11px] text-slate-500">
+                            Xóa: <span class="text-slate-700 font-medium">${escapeHtml(doc.deleteTime || "--:--")} • ${formatDateVN(doc.deleteDate)}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="event.stopPropagation(); openErrorReportModal('${doc.subject}', '${safeTitle.replace(/'/g, "\\'")}')" title="Báo lỗi" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition">
+                                <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white text-xs font-semibold transition">
+                                <span>Vào ôn</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================================================
+        // VIEWER & ADMIN LOGIC
+        // ============================================================================
+        function openStudyViewer(docId) {
+            const doc = studyDocuments.find(d => d.id === docId);
+            if (!doc) return showToast("Không tìm thấy tài liệu hoặc đã hết hạn!", "error");
+
+            currentViewingDoc = doc;
+            const modal = document.getElementById("htmlViewerModal");
+            const iframe = document.getElementById("studyHtmlIframe");
+            
+            document.getElementById("viewerSubjectBadge").textContent = doc.subject;
+            document.getElementById("viewerDocTitle").textContent = doc.title || doc.fileName;
+            document.getElementById("viewerExpireText").textContent = `Tự xóa: ${doc.deleteTime} (${formatDateVN(doc.deleteDate)})`;
+            
+            iframe.srcdoc = doc.htmlContent || "<h3 style='font-family:sans-serif;padding:2rem;'>Nội dung HTML trống.</h3>";
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+            lucide.createIcons();
+        }
+
+        function closeStudyViewer() {
+            const modal = document.getElementById("htmlViewerModal");
+            const iframe = document.getElementById("studyHtmlIframe");
+            if (iframe) iframe.srcdoc = "";
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+            document.body.classList.remove("overflow-hidden");
+            currentViewingDoc = null;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedHtmlDraft = {
+                    fileName: file.name,
+                    htmlContent: e.target.result,
+                    size: (file.size / 1024).toFixed(1) + " KB"
+                };
+                document.getElementById("selectedFileName").innerHTML = `Đã chọn: <span class="text-emerald-600 font-semibold">${escapeHtml(file.name)}</span>`;
+                document.getElementById("selectedFileSize").textContent = `Dung lượng: ${uploadedHtmlDraft.size} • Sẵn sàng`;
+                document.getElementById("previewDraftBtn").disabled = false;
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        function previewSelectedHtmlBeforeUpload() {
+            if (!uploadedHtmlDraft) return;
+            const subject = document.getElementById("adminSubject").value;
+            const customTitle = document.getElementById("adminDocTitle").value.trim();
+            
+            currentViewingDoc = {
+                id: "PREVIEW_DRAFT",
+                subject,
+                title: customTitle || uploadedHtmlDraft.fileName.replace(/\.html?$/i, ""),
+                fileName: uploadedHtmlDraft.fileName,
+                htmlContent: uploadedHtmlDraft.htmlContent
+            };
+
+            document.getElementById("viewerSubjectBadge").textContent = `${subject} (Xem thử)`;
+            document.getElementById("viewerDocTitle").textContent = currentViewingDoc.title;
+            document.getElementById("studyHtmlIframe").srcdoc = uploadedHtmlDraft.htmlContent;
+            
+            document.getElementById("htmlViewerModal").classList.remove("hidden");
+            document.getElementById("htmlViewerModal").classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        async function handleAdminUpload(event) {
+            event.preventDefault();
+            if (!uploadedHtmlDraft) return showToast("Vui lòng chọn file .html!", "error");
+
+            const subject = document.getElementById("adminSubject").value;
+            const customTitle = document.getElementById("adminDocTitle").value.trim();
+            const deleteDate = document.getElementById("adminDeleteDate").value;
+            const deleteTime = document.getElementById("adminDeleteTime").value;
+
+            if (!deleteDate || !deleteTime) return showToast("Chọn đầy đủ Ngày & Giờ xóa!", "error");
+
+            const deleteTimestamp = new Date(`${deleteDate}T${deleteTime}:00`).getTime();
+            if (isNaN(deleteTimestamp) || deleteTimestamp <= Date.now()) return showToast("Thời gian xóa phải lớn hơn hiện tại!", "error");
+
+            const submitBtn = document.getElementById("uploadSubmitBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Đang đăng...</span>`;
+            lucide.createIcons();
+
+            const payload = {
+                subject,
+                title: customTitle || uploadedHtmlDraft.fileName.replace(/\.html?$/i, ""),
+                fileName: uploadedHtmlDraft.fileName,
+                htmlContent: uploadedHtmlDraft.htmlContent,
+                deleteDate, deleteTime, deleteTimestamp,
+                createdAt: Date.now()
+            };
+
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/documents.json`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                payload.id = data.name || ("doc_" + Date.now());
+            } catch (err) {
+                payload.id = "doc_" + Date.now();
+            }
+
+            studyDocuments.unshift(payload);
+            saveLocalCache();
+            renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
+
+            document.getElementById("adminDocTitle").value = "";
+            document.getElementById("adminHtmlFile").value = "";
+            document.getElementById("selectedFileName").innerHTML = `Bấm để chọn hoặc kéo thả file <span class="text-indigo-600">.html</span> vào đây`;
+            document.getElementById("selectedFileSize").textContent = "Hỗ trợ đầy đủ CSS/JS bên trong file HTML";
+            document.getElementById("previewDraftBtn").disabled = true;
+            uploadedHtmlDraft = null;
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>Đăng Lên Web</span>`;
+            lucide.createIcons();
+            showToast(`Đã đăng tài liệu môn ${subject} thành công!`, "success");
+        }
+
+        async function deleteDocumentById(docId) {
+            studyDocuments = studyDocuments.filter(d => d.id !== docId);
+            saveLocalCache(); renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
+            try { await fetch(`${FIREBASE_DB_URL}/documents/${docId}.json`, { method: "DELETE" }); } catch (e) {}
+            showToast("Đã xóa tài liệu.", "info");
+        }
+
+        function renderAdminLists() {
+            const docsWrapper = document.getElementById("adminDocsListWrapper");
+            const reportsWrapper = document.getElementById("adminReportsListWrapper");
+            
+            document.getElementById("adminDocCount").textContent = studyDocuments.length;
+            document.getElementById("adminReportCount").textContent = errorReports.length;
+            
+            const navBadge = document.getElementById("adminReportBadge");
+            if (navBadge && errorReports.length > 0) {
+                navBadge.textContent = errorReports.length;
+                navBadge.classList.remove("hidden");
+            } else if (navBadge) {
+                navBadge.classList.add("hidden");
+            }
+
+            if (docsWrapper) {
+                docsWrapper.innerHTML = studyDocuments.length === 0 
+                    ? `<div class="text-center py-10 text-slate-500 text-sm">Chưa có tài liệu nào đang hoạt động.</div>`
+                    : studyDocuments.map(doc => {
+                        const meta = getSubjectMeta(doc.subject);
+                        return `
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="space-y-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold border ${meta.badgeClass}">${escapeHtml(doc.subject)}</span>
+                                        <span class="text-sm font-bold text-slate-900 truncate">${escapeHtml(doc.title || doc.fileName)}</span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 flex items-center gap-3 flex-wrap">
+                                        <span>File: <code class="text-slate-700 bg-slate-200 px-1 rounded">${escapeHtml(doc.fileName)}</code></span>
+                                        <span>•</span>
+                                        <span class="text-amber-600">Xóa: ${escapeHtml(doc.deleteTime)} ${formatDateVN(doc.deleteDate)}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button onclick="openStudyViewer('${doc.id}')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-medium text-slate-700 transition shadow-sm">Xem</button>
+                                    <button onclick="deleteDocumentById('${doc.id}')" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-medium transition flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Xóa</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+            }
+
+            if (reportsWrapper) {
+                reportsWrapper.innerHTML = errorReports.length === 0 
+                    ? `<div class="text-center py-10 text-slate-500 text-sm">Chưa có báo lỗi nào từ học sinh.</div>`
+                    : errorReports.map(rep => `
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200">${escapeHtml(rep.subject)}</span>
+                                    <span class="text-xs font-semibold text-slate-900">HS: ${escapeHtml(rep.studentName)} — Lớp ${escapeHtml(rep.studentClass)}</span>
+                                </div>
+                                <button onclick="deleteReportById('${rep.id}')" class="text-xs text-slate-500 hover:text-emerald-600 transition flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Đã xử lý</button>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">${escapeHtml(rep.content)}</p>
+                        </div>
+                    `).join("");
+            }
+            lucide.createIcons();
+        }
+
+        async function deleteReportById(repId) {
+            errorReports = errorReports.filter(r => r.id !== repId);
+            saveLocalCache(); renderAdminLists();
+            try { await fetch(`${FIREBASE_DB_URL}/reports/${repId}.json`, { method: "DELETE" }); } catch (e) {}
+            showToast("Đã đánh dấu xử lý!", "success");
+        }
+
+        // ============================================================================
+        // REPORTING
+        // ============================================================================
+        function openErrorReportModal(preselectedSubject = null, docTitleContext = null) {
+            const modal = document.getElementById("errorReportModal");
+            if (preselectedSubject) document.getElementById("reportSubject").value = preselectedSubject;
+            
+            const contentArea = document.getElementById("reportContent");
+            if (docTitleContext) contentArea.placeholder = `Báo lỗi tại bài "${docTitleContext}": ...`;
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            lucide.createIcons();
+        }
+
+        function closeErrorReportModal() {
+            document.getElementById("errorReportModal").classList.add("hidden");
+            document.getElementById("errorReportModal").classList.remove("flex");
+        }
+
+        async function submitErrorReport(event) {
+            event.preventDefault();
+            const subject = document.getElementById("reportSubject").value;
+            const studentName = document.getElementById("reportStudentName").value.trim();
+            const studentClass = document.getElementById("reportStudentClass").value;
+            const content = document.getElementById("reportContent").value.trim();
+
+            const submitBtn = document.getElementById("submitReportBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Đang gửi...</span>`;
+            lucide.createIcons();
+
+            const reportData = { subject, studentName, studentClass, content, docTitle: currentViewingDoc ? currentViewingDoc.title : "Chung", createdAt: Date.now() };
+
+            // Discord
+            try {
+                await fetch(DISCORD_WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: "Tài Liệu Ôn Tập 8 - Báo Lỗi",
+                        embeds: [{
+                            title: `🚨 BÁO LỖI TÀI LIỆU`,
+                            color: 15548997,
+                            fields: [
+                                { name: "📚 Môn", value: subject, inline: true },
+                                { name: "👨‍🎓 Học Sinh", value: studentName, inline: true },
+                                { name: "🏫 Lớp", value: studentClass, inline: true },
+                                { name: "📝 Nội dung", value: content, inline: false }
+                            ],
+                            footer: { text: `Tài Liệu Ôn Tập 8 • ${new Date().toLocaleString("vi-VN")}` }
+                        }]
+                    })
+                });
+            } catch (e) {}
+
+            // Firebase
+            try {
+                const fbRes = await fetch(`${FIREBASE_DB_URL}/reports.json`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(reportData)
+                });
+                if (fbRes.ok) {
+                    const fbJson = await fbRes.json();
+                    reportData.id = fbJson.name || ("rep_" + Date.now());
+                } else reportData.id = "rep_" + Date.now();
+            } catch (e) { reportData.id = "rep_" + Date.now(); }
+
+            errorReports.unshift(reportData);
+            saveLocalCache(); renderAdminLists();
+
+            document.getElementById("reportStudentName").value = "";
+            document.getElementById("reportContent").value = "";
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>Gửi Báo Lỗi</span>`;
+            lucide.createIcons();
+
+            closeErrorReportModal();
+            showToast("Đã gửi báo lỗi thành công!", "success");
+        }
+
+        // ============================================================================
+        // HELPERS
+        // ============================================================================
+        function switchMainView(view) {
+            const studyView = document.getElementById("studyView");
+            const adminView = document.getElementById("adminView");
+            const navStudyBtn = document.getElementById("navStudyBtn");
+            const navAdminBtn = document.getElementById("navAdminBtn");
+
+            if (view === "admin") {
+                if (!isAdminAuthenticated) return openAdminLogin();
+                studyView.classList.add("hidden");
+                adminView.classList.remove("hidden");
+                navAdminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-white text-indigo-600 shadow-sm transition";
+                navStudyBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition";
+                renderAdminLists();
+            } else {
+                adminView.classList.add("hidden");
+                studyView.classList.remove("hidden");
+                navStudyBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-white text-indigo-600 shadow-sm transition";
+                navAdminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition";
+            }
+        }
+
+        function switchAdminSubTab(tab) {
+            const docsBtn = document.getElementById("adminSubTabDocs");
+            const reportsBtn = document.getElementById("adminSubTabReports");
+            const docsList = document.getElementById("adminDocsListWrapper");
+            const reportsList = document.getElementById("adminReportsListWrapper");
+
+            if (tab === "reports") {
+                docsList.classList.add("hidden");
+                reportsList.classList.remove("hidden");
+                reportsBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition flex items-center gap-1.5 shadow-sm";
+                docsBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition";
+            } else {
+                reportsList.classList.add("hidden");
+                docsList.classList.remove("hidden");
+                docsBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition shadow-sm";
+                reportsBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+            }
+        }
+
+        function formatRemainingTime(timestamp) {
+            if (!timestamp) return "Còn hiệu lực";
+            const diff = Number(timestamp) - Date.now();
+            if (diff <= 0) return "Đã hết hạn";
+
+            const totalMinutes = Math.floor(diff / 60000);
+            const days = Math.floor(totalMinutes / (60 * 24));
+            const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+            const mins = totalMinutes % 60;
+
+            if (days > 0) return `Còn ${days} ngày ${hours}h`;
+            if (hours > 0) return `Còn ${hours}h ${mins}p`;
+            return `Còn ${mins} phút`;
+        }
+
+        function updateLiveCountdowns() {
+            document.querySelectorAll("[data-expire-ts]").forEach(el => {
+                const ts = el.getAttribute("data-expire-ts");
+                const label = el.querySelector(".countdown-label");
+                if (ts && label) label.textContent = formatRemainingTime(ts);
+            });
+        }
+
+        function formatDateVN(dateStr) {
+            if (!dateStr || !dateStr.includes("-")) return dateStr || "";
+            const [y, m, d] = dateStr.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toastContainer");
+            if (!container) return;
+
+            const colors = {
+                success: "border-emerald-200 bg-white text-emerald-700 shadow-emerald-100",
+                error: "border-rose-200 bg-white text-rose-700 shadow-rose-100",
+                info: "border-indigo-200 bg-white text-indigo-700 shadow-indigo-100"
+            };
+
+            const toast = document.createElement("div");
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(8px)";
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+    </script>
+</body>
+</html>

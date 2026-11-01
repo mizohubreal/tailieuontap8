@@ -34,6 +34,37 @@
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(99, 102, 241, 0.15); border-color: #c7d2fe; }
         .dark .card-hover:hover { box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.4); border-color: #4f46e5; }
+
+        /* ===== CUSTOM SCROLLBAR CHO THANH TAB MÔN HỌC ===== */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+        .dark .custom-scrollbar {
+            scrollbar-color: #475569 transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
     </style>
 
     <script>
@@ -100,8 +131,9 @@
                 </div>
                 
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <button onclick="openNotificationHistory()" class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl text-sm font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition flex items-center gap-2">
+                    <button onclick="openNotificationHistory()" class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl text-sm font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition flex items-center gap-2 relative">
                         <i data-lucide="bell" class="w-4 h-4"></i> Bảng tin thông báo
+                        <span id="unreadNotiBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900">!</span>
                     </button>
                     <button onclick="openErrorReportModal()" class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl text-sm font-medium bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition flex items-center gap-2">
                         <i data-lucide="flag" class="w-4 h-4"></i> Báo lỗi
@@ -109,13 +141,21 @@
                 </div>
             </div>
 
-            <!-- Subject Tabs (Horizontal Scroll) -->
+            <!-- Subject Tabs (Horizontal Scroll — có scrollbar kéo được + bóng mờ 2 mép) -->
             <div class="relative -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div id="subjectTabsContainer" class="flex overflow-x-auto scrollbar-hide gap-3 pb-2 pt-1 snap-x"></div>
+                <!-- Bóng mờ báo hiệu còn nội dung bị khuất bên trái -->
+                <div id="tabShadowLeft" class="pointer-events-none absolute left-4 sm:left-0 top-0 bottom-3 w-8 bg-gradient-to-r from-slate-50 via-slate-50/80 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/80 z-10 opacity-0 transition-opacity duration-200"></div>
+
+                <!-- Thanh tab có scrollbar kéo được -->
+                <div id="subjectTabsContainer"
+                     class="custom-scrollbar flex overflow-x-auto gap-2 sm:gap-3 pb-3 pt-1 snap-x snap-proximity"></div>
+
+                <!-- Bóng mờ báo hiệu còn nội dung bị khuất bên phải -->
+                <div id="tabShadowRight" class="pointer-events-none absolute right-4 sm:right-0 top-0 bottom-3 w-8 bg-gradient-to-l from-slate-50 via-slate-50/80 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/80 z-10 opacity-0 transition-opacity duration-200"></div>
             </div>
 
             <!-- Subject Banner & Sort -->
-            <div class="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div id="bannerContainer" class="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
                 <div class="flex items-center gap-4">
                     <div id="bannerIconBox" class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                         <i data-lucide="layout-grid" class="w-7 h-7"></i>
@@ -126,7 +166,7 @@
                     </div>
                 </div>
                 <!-- Sort Dropdown -->
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto">
+                <div id="sortContainer" class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto">
                     <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 ml-1"></i>
                     <select id="sortSelect" onchange="renderStudyMaterials()" class="bg-transparent text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none w-full md:w-auto cursor-pointer">
                         <option value="newest">Mới nhất</option>
@@ -370,7 +410,7 @@
         </div>
     </div>
 
-    <!-- MODAL MỚI: THÔNG BÁO PHẢN HỒI TỪ ADMIN (CHỈ GỬI CHO THIẾT BỊ BÁO CÁO) -->
+    <!-- MODAL: PHẢN HỒI TỪ ADMIN (CHỈ GỬI CHO THIẾT BỊ BÁO CÁO) -->
     <div id="adminReplyNotiModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             <div class="bg-gradient-to-br from-indigo-500 to-violet-600 p-6 text-center">
@@ -389,11 +429,34 @@
         </div>
     </div>
 
+    <!-- MODAL: THÔNG BÁO TOÀN CẦU (GỬI TỪ ADMIN) -->
+    <div id="globalNotiPopup" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-48 h-48 text-white"></i></div>
+                <div class="relative z-10 flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex"><i data-lucide="bell" class="w-10 h-10 text-white"></i></div>
+                    <h2 class="text-3xl font-black text-white tracking-wider" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">TLOT8</h2>
+                    <p class="text-sm font-semibold text-blue-100 uppercase tracking-widest mt-1">Thông Báo Mới</p>
+                </div>
+            </div>
+            <div class="p-6 bg-white dark:bg-slate-800">
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 mb-6">
+                    <p id="globalNotiPopupContent" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium"></p>
+                </div>
+                <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <p class="text-xs text-slate-500 font-medium">Make By: <span class="text-indigo-600 font-bold">Thai Minh</span></p>
+                    <button onclick="closeGlobalNotiPopup()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md transition">Đã hiểu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toastContainer" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
 
     <script>
         const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1566440919152984064/GVhnkij011dzXDbva6JsvytE-OJQerSV35vjOzzDCyVU2tzgFMV6r_fCEjEtyMhViIjh";
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1565660693959675954/2AFAcHeof5PHT0M7tOF2kCoNBIYiwQS42dPAdKpNtoSGXMW28qSwCqRwgPlmVIlqvhhs";
         const HEADER_LOGO_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
 
         const LOCAL_STORAGE_DOCS_KEY = "tailieuontap8_docs_v1";
@@ -402,12 +465,13 @@
         const LOCAL_STORAGE_AUTH_KEY = "tailieuontap8_auth_v1";
         const LOCAL_STORAGE_BOOKMARKS_KEY = "tailieuontap8_bookmarks_v1";
         const LOCAL_STORAGE_SEEN_REPLIES_KEY = "tailieuontap8_seen_replies_v1";
+        const LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY = "tailieuontap8_seen_global_notis_v1";
         const LOCAL_STORAGE_DEVICE_ID_KEY = "tailieuontap8_device_id";
 
         const ADMIN_USER_HASH = "VGxvdDhBZG1pbg==";
         const ADMIN_PASS_HASH = "VGxvdDhBZG1pbkAxMjM0NQ==";
 
-        // Lấy hoặc tạo Device ID cho thiết bị hiện tại
+        // Định danh thiết bị
         let currentDeviceId = localStorage.getItem(LOCAL_STORAGE_DEVICE_ID_KEY);
         if (!currentDeviceId) {
             currentDeviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -429,6 +493,7 @@
         let notificationsList = [];
         let bookmarkedIds = [];
         let seenReplies = []; 
+        let seenGlobalNotis = []; 
         let selectedSubjectFilter = "ALL";
         let uploadedHtmlDraft = null;
         let editUploadedHtmlDraft = null;
@@ -447,8 +512,16 @@
             renderSubjectTabs();
             renderStudyMaterials();
             renderAdminLists();
+            updateUnreadBadges();
 
             syncFromFirebase(false);
+
+            // Gắn listener cho thanh tab môn học (scrollbar + shadow 2 mép)
+            const _tabsEl = document.getElementById("subjectTabsContainer");
+            if (_tabsEl) _tabsEl.addEventListener("scroll", updateTabScrollShadows, { passive: true });
+            window.addEventListener("resize", updateTabScrollShadows);
+            // Cập nhật shadow lần đầu sau khi render
+            setTimeout(updateTabScrollShadows, 100);
             
             setInterval(() => {
                 syncFromFirebase(false); 
@@ -456,6 +529,20 @@
                 updateLiveCountdowns();
             }, 7000);
         });
+
+        // ====== HÀM CẬP NHẬT SHADOW BÁO HIỆU CÒN NỘI DUNG BỊ KHUẤT ======
+        function updateTabScrollShadows() {
+            const container = document.getElementById("subjectTabsContainer");
+            const leftShadow = document.getElementById("tabShadowLeft");
+            const rightShadow = document.getElementById("tabShadowRight");
+            if (!container || !leftShadow || !rightShadow) return;
+
+            const scrollLeft = container.scrollLeft;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+
+            leftShadow.style.opacity = scrollLeft > 4 ? "1" : "0";
+            rightShadow.style.opacity = scrollLeft < maxScroll - 4 ? "1" : "0";
+        }
 
         function toggleDarkMode() {
             const html = document.documentElement;
@@ -543,14 +630,28 @@
         }
 
         // --- NOTIFICATIONS ---
+        function updateUnreadBadges() {
+            const unreadGlobal = notificationsList.filter(n => !seenGlobalNotis.includes(n.id)).length;
+            const badge = document.getElementById("unreadNotiBadge");
+            if (badge) {
+                if (unreadGlobal > 0) badge.classList.remove("hidden");
+                else badge.classList.add("hidden");
+            }
+        }
+
         function openNotificationHistory() {
             const listEl = document.getElementById("notiHistoryList");
             listEl.innerHTML = notificationsList.length === 0 ? `<p class="text-center text-slate-500 py-6">Chưa có thông báo nào.</p>`
-                : notificationsList.map(n => `
+                : notificationsList.map(n => {
+                    if (!seenGlobalNotis.includes(n.id)) seenGlobalNotis.push(n.id);
+                    return `
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                         <p class="text-xs text-slate-400 mb-2 font-medium flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${new Date(n.createdAt).toLocaleString('vi-VN')}</p>
                         <p class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">${escapeHtml(n.content)}</p>
-                    </div>`).join("");
+                    </div>`;
+                }).join("");
+            localStorage.setItem(LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY, JSON.stringify(seenGlobalNotis));
+            updateUnreadBadges();
             document.getElementById("notiHistoryModal").classList.remove("hidden"); document.getElementById("notiHistoryModal").classList.add("flex");
             lucide.createIcons();
         }
@@ -562,10 +663,28 @@
             if (!content) return;
             const newNoti = { id: "noti_" + Date.now(), content, createdAt: Date.now() };
             notificationsList.unshift(newNoti); saveLocalCache();
+            
+            // Hiển thị ngay lập tức cho Admin
+            showGlobalNotiPopup(content, newNoti.id);
+
             try {
                 await fetch(`${FIREBASE_DB_URL}/notifications.json`, { method: "PUT", body: JSON.stringify(notificationsList) });
                 showToast("Đã gửi thông báo!", "success"); document.getElementById("adminNotiContent").value = "";
             } catch (err) { showToast("Đã lưu cục bộ (Lỗi Firebase).", "info"); }
+        }
+
+        function showGlobalNotiPopup(content, id) {
+            document.getElementById("globalNotiPopupContent").textContent = content;
+            document.getElementById("globalNotiPopup").classList.remove("hidden");
+            document.getElementById("globalNotiPopup").classList.add("flex");
+            if (!seenGlobalNotis.includes(id)) seenGlobalNotis.push(id);
+            localStorage.setItem(LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY, JSON.stringify(seenGlobalNotis));
+            updateUnreadBadges();
+        }
+
+        function closeGlobalNotiPopup() {
+            document.getElementById("globalNotiPopup").classList.add("hidden");
+            document.getElementById("globalNotiPopup").classList.remove("flex");
         }
 
         async function fetchNotifications() {
@@ -573,15 +692,25 @@
                 const res = await fetch(`${FIREBASE_DB_URL}/notifications.json?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
+                    const prevNotisStr = JSON.stringify(notificationsList);
                     notificationsList = Array.isArray(data) ? data : (data && data.content ? [{ id: "old", content: data.content, createdAt: Date.now() }] : []);
-                    saveLocalCache();
+                    
+                    if (JSON.stringify(notificationsList) !== prevNotisStr) {
+                        saveLocalCache();
+                        updateUnreadBadges();
+                        
+                        // Tự động hiển thị popup nếu có thông báo mới
+                        const newNotis = notificationsList.filter(n => !seenGlobalNotis.includes(n.id));
+                        if (newNotis.length > 0) {
+                            showGlobalNotiPopup(newNotis[0].content, newNotis[0].id);
+                        }
+                    }
                 }
             } catch (e) {}
         }
 
         // --- ADMIN REPLY PRIVATE NOTIFICATION ---
         function checkAdminReplies() {
-            // Chỉ kiểm tra khi là học sinh, không phải Admin
             if (isAdminAuthenticated) return; 
             
             const myReports = errorReports.filter(r => r.deviceId === currentDeviceId && r.adminReply);
@@ -600,7 +729,6 @@
                 document.getElementById("adminReplyNotiModal").classList.remove("hidden");
                 document.getElementById("adminReplyNotiModal").classList.add("flex");
                 
-                // Đánh dấu là đã xem
                 seenReplies.push(newReply.id);
                 localStorage.setItem(LOCAL_STORAGE_SEEN_REPLIES_KEY, JSON.stringify(seenReplies));
             }
@@ -619,7 +747,8 @@
                 notificationsList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_NOTI_KEY)) || [];
                 bookmarkedIds = JSON.parse(localStorage.getItem(LOCAL_STORAGE_BOOKMARKS_KEY)) || [];
                 seenReplies = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEEN_REPLIES_KEY)) || [];
-            } catch (e) { studyDocuments = []; errorReports = []; notificationsList = []; bookmarkedIds = []; seenReplies = []; }
+                seenGlobalNotis = JSON.parse(localStorage.getItem(LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY)) || [];
+            } catch (e) { studyDocuments = []; errorReports = []; notificationsList = []; bookmarkedIds = []; seenReplies = []; seenGlobalNotis = []; }
         }
 
         function saveLocalCache() {
@@ -662,7 +791,6 @@
                 await checkAndPurgeExpiredDocuments();
                 saveLocalCache(); renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
                 
-                // Kiểm tra xem có phản hồi báo cáo mới không
                 checkAdminReplies();
 
             } catch (err) { await checkAndPurgeExpiredDocuments(); }
@@ -687,68 +815,157 @@
 
         function updateBannerForSubject(subjectId) {
             const titleEl = document.getElementById("bannerTitle"), subEl = document.getElementById("bannerSub"), iconBox = document.getElementById("bannerIconBox");
-            if (subjectId === "ALL") {
+            const sortC = document.getElementById("sortContainer");
+            
+            if (subjectId === "REPLIES") {
+                titleEl.textContent = "Phản hồi từ Admin"; subEl.textContent = "Các phản hồi dành riêng cho thiết bị của bạn.";
+                iconBox.className = "w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="message-square" class="w-7 h-7"></i>`;
+                if(sortC) sortC.style.display = "none";
+            } else if (subjectId === "ALL") {
                 titleEl.textContent = "Tất cả các môn học"; subEl.textContent = "Khám phá và chọn bài ôn tập cho bạn.";
                 iconBox.className = "w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="layout-grid" class="w-7 h-7"></i>`;
+                if(sortC) sortC.style.display = "flex";
             } else if (subjectId === "BOOKMARKS") {
                 titleEl.textContent = "Tài liệu đã lưu"; subEl.textContent = "Danh sách các bài ôn bạn đã đánh dấu sao.";
                 iconBox.className = "w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="star" class="w-7 h-7"></i>`;
+                if(sortC) sortC.style.display = "flex";
             } else {
                 const meta = getSubjectMeta(subjectId);
                 const count = studyDocuments.filter(d => d.subject === subjectId && !d.isDraft).length;
                 titleEl.textContent = `Môn: ${meta.name}`; subEl.textContent = `Hiện có ${count} tài liệu ôn tập.`;
                 iconBox.className = `w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 ${meta.iconBg}`; iconBox.innerHTML = `<i data-lucide="${meta.icon}" class="w-7 h-7"></i>`;
+                if(sortC) sortC.style.display = "flex";
             }
             lucide.createIcons();
         }
 
+        // ====== RENDER TAB (giữ vị trí cuộn + responsive mobile gọn hơn) ======
         function renderSubjectTabs() {
             const container = document.getElementById("subjectTabsContainer");
+            if (!container) return;
+
+            const prevScrollLeft = container.scrollLeft; // giữ vị trí cuộn khi re-render
+
             const totalDocsCounter = document.getElementById("totalDocsCounter");
             if (totalDocsCounter) totalDocsCounter.textContent = `Tổng cộng: ${studyDocuments.filter(d => !d.isDraft).length} tài liệu`;
-            
+
             const allActive = selectedSubjectFilter === "ALL";
             const bookmarksActive = selectedSubjectFilter === "BOOKMARKS";
-            
+            const repliesActive = selectedSubjectFilter === "REPLIES";
+            const myRepliesCount = errorReports.filter(r => r.deviceId === currentDeviceId && r.adminReply).length;
+
+            const btnBase = "snap-start shrink-0 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl border transition";
+            const iconWrap = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0";
+            const iconSize = "w-3.5 h-3.5 sm:w-4 sm:h-4";
+            const titleTxt = "text-xs sm:text-sm font-bold whitespace-nowrap";
+            const subTxt  = "text-[10px] sm:text-[11px] font-medium whitespace-nowrap";
+
             let html = `
-                <button onclick="selectSubjectTab('ALL')" class="snap-start shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition ${allActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300'}">
-                    <div class="w-8 h-8 rounded-xl ${allActive ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700'} flex items-center justify-center shrink-0"><i data-lucide="layout-grid" class="w-4 h-4"></i></div>
+                <button onclick="selectSubjectTab('ALL')" class="${btnBase} ${allActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300'}">
+                    <div class="${iconWrap} ${allActive ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700'}"><i data-lucide="layout-grid" class="${iconSize}"></i></div>
                     <div class="flex flex-col text-left">
-                        <div class="text-sm font-bold whitespace-nowrap">Tất Cả</div>
-                        <div class="text-[11px] font-medium ${allActive ? 'text-white/80' : 'text-slate-500'} whitespace-nowrap">${studyDocuments.filter(d=>!d.isDraft).length} bài</div>
+                        <div class="${titleTxt}">Tất Cả</div>
+                        <div class="${subTxt} ${allActive ? 'text-white/80' : 'text-slate-500'}">${studyDocuments.filter(d=>!d.isDraft).length} bài</div>
                     </div>
                 </button>
-                <button onclick="selectSubjectTab('BOOKMARKS')" class="snap-start shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition ${bookmarksActive ? 'bg-amber-500 border-amber-500 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-300'}">
-                    <div class="w-8 h-8 rounded-xl ${bookmarksActive ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-500'} flex items-center justify-center shrink-0"><i data-lucide="star" class="w-4 h-4"></i></div>
+                <button onclick="selectSubjectTab('BOOKMARKS')" class="${btnBase} ${bookmarksActive ? 'bg-amber-500 border-amber-500 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-300'}">
+                    <div class="${iconWrap} ${bookmarksActive ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-500'}"><i data-lucide="star" class="${iconSize}"></i></div>
                     <div class="flex flex-col text-left">
-                        <div class="text-sm font-bold whitespace-nowrap">Đã lưu</div>
-                        <div class="text-[11px] font-medium ${bookmarksActive ? 'text-white/80' : 'text-slate-500'} whitespace-nowrap">${bookmarkedIds.length} bài</div>
+                        <div class="${titleTxt}">Đã lưu</div>
+                        <div class="${subTxt} ${bookmarksActive ? 'text-white/80' : 'text-slate-500'}">${bookmarkedIds.length} bài</div>
+                    </div>
+                </button>
+                <button onclick="selectSubjectTab('REPLIES')" class="${btnBase} relative ${repliesActive ? 'bg-emerald-600 border-emerald-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-emerald-300'}">
+                    ${myRepliesCount > 0 && !repliesActive ? `<span class="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800"></span>` : ''}
+                    <div class="${iconWrap} ${repliesActive ? 'bg-white/20' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500'}"><i data-lucide="message-square" class="${iconSize}"></i></div>
+                    <div class="flex flex-col text-left">
+                        <div class="${titleTxt}">Phản hồi</div>
+                        <div class="${subTxt} ${repliesActive ? 'text-white/80' : 'text-slate-500'}">${myRepliesCount} tin nhắn</div>
                     </div>
                 </button>
             `;
+
             SUBJECTS.forEach(sub => {
                 const isActive = selectedSubjectFilter === sub.id;
                 const count = studyDocuments.filter(d => d.subject === sub.id && !d.isDraft).length;
                 html += `
-                    <button onclick="selectSubjectTab('${sub.id}')" class="snap-start shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition ${isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300'}">
-                        <div class="w-8 h-8 rounded-xl ${isActive ? 'bg-white/20' : sub.iconBg} flex items-center justify-center shrink-0"><i data-lucide="${sub.icon}" class="w-4 h-4"></i></div>
+                    <button onclick="selectSubjectTab('${sub.id}')" class="${btnBase} ${isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300'}">
+                        <div class="${iconWrap} ${isActive ? 'bg-white/20' : sub.iconBg}"><i data-lucide="${sub.icon}" class="${iconSize}"></i></div>
                         <div class="flex flex-col text-left">
-                            <div class="text-sm font-bold whitespace-nowrap">${sub.shortName}</div>
-                            <div class="text-[11px] font-medium ${isActive ? 'text-white/80' : 'text-slate-500'} whitespace-nowrap">${count} bài</div>
+                            <div class="${titleTxt}">${sub.shortName}</div>
+                            <div class="${subTxt} ${isActive ? 'text-white/80' : 'text-slate-500'}">${count} bài</div>
                         </div>
                     </button>`;
             });
-            container.innerHTML = html; lucide.createIcons();
+
+            container.innerHTML = html;
+            lucide.createIcons();
+
+            // Khôi phục vị trí cuộn
+            container.scrollLeft = prevScrollLeft;
+
+            // Cập nhật shadow sau khi DOM đã render
+            requestAnimationFrame(updateTabScrollShadows);
         }
 
         function syncMobileSearch(val) { document.getElementById("searchInput").value = val; renderStudyMaterials(); }
 
         function renderStudyMaterials() {
             const container = document.getElementById("materialsContainer");
+            
+            // XỬ LÝ RIÊNG TAB PHẢN HỒI
+            if (selectedSubjectFilter === "REPLIES") {
+                const myReplies = errorReports.filter(r => r.deviceId === currentDeviceId && r.adminReply);
+                myReplies.sort((a,b) => b.createdAt - a.createdAt);
+                
+                if (myReplies.length === 0) {
+                    container.innerHTML = `
+                        <div class="py-20 flex flex-col items-center justify-center text-center">
+                            <div class="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-300 dark:text-slate-600">
+                                <i data-lucide="inbox" class="w-12 h-12"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Chưa có phản hồi nào</h3>
+                            <p class="text-slate-500 dark:text-slate-400 max-w-sm">Khi bạn gửi báo lỗi và Admin phản hồi, tin nhắn sẽ xuất hiện tại đây.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Hộp thư phản hồi</h3>
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${myReplies.length} tin nhắn</span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${myReplies.map(rep => `
+                                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+                                        <div class="flex items-center justify-between gap-2 mb-3">
+                                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">${escapeHtml(rep.subject)}</span>
+                                            <span class="text-xs text-slate-400 font-medium">${new Date(rep.createdAt).toLocaleString('vi-VN')}</span>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                <p class="text-xs font-bold text-slate-500 mb-1">Bạn đã báo:</p>
+                                                <p class="text-sm text-slate-700 dark:text-slate-300">${escapeHtml(rep.content)}</p>
+                                            </div>
+                                            <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-800">
+                                                <p class="text-xs font-bold text-emerald-600 mb-1"><i data-lucide="message-square" class="w-3.5 h-3.5 inline mr-1"></i>Admin phản hồi:</p>
+                                                <p class="text-sm font-medium text-emerald-800 dark:text-emerald-300">${escapeHtml(rep.adminReply)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+                return;
+            }
+
+            // XỬ LÝ CÁC TAB MÔN HỌC BÌNH THƯỜNG
             const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
             const sortMode = document.getElementById("sortSelect")?.value || "newest";
             
-            // Lọc tài liệu (Bỏ qua các file nháp đối với học sinh)
             let filteredDocs = studyDocuments.filter(doc => !doc.isDraft);
             
             if (selectedSubjectFilter === "BOOKMARKS") {
@@ -761,11 +978,10 @@
                 filteredDocs = filteredDocs.filter(doc => (doc.title && doc.title.toLowerCase().includes(query)) || (doc.fileName && doc.fileName.toLowerCase().includes(query)));
             }
 
-            // Sắp xếp
             filteredDocs.sort((a, b) => {
                 if (sortMode === "views") return (b.views || 0) - (a.views || 0);
                 if (sortMode === "expiring") return (a.deleteTimestamp || 0) - (b.deleteTimestamp || 0);
-                return (b.createdAt || 0) - (a.createdAt || 0); // newest
+                return (b.createdAt || 0) - (a.createdAt || 0);
             });
 
             let html = "";
@@ -774,10 +990,7 @@
             subjectsToRender.forEach(sub => {
                 const docsForSubject = filteredDocs.filter(doc => doc.subject === sub.id);
                 
-                // Nếu tab Đã lưu mà môn này không có bài nào lưu thì bỏ qua
                 if (selectedSubjectFilter === "BOOKMARKS" && docsForSubject.length === 0) return;
-                // Nếu xem từng môn mà không có bài nào thì vẫn hiện empty state
-                if (selectedSubjectFilter !== "ALL" && selectedSubjectFilter !== "BOOKMARKS" && docsForSubject.length === 0) { /* Hiển thị bên dưới */ }
 
                 html += `
                     <div class="space-y-4">
@@ -1095,7 +1308,6 @@
 
             const docTitleContext = currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName || "Chung") : "Chung";
             
-            // Lưu kèm deviceId để nhận phản hồi sau này
             const reportData = { 
                 subject, studentName, studentClass, content, docTitle: docTitleContext, 
                 createdAt: Date.now(), adminReply: "", deviceId: currentDeviceId 

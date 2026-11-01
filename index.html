@@ -338,7 +338,7 @@
                     <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
                     <span id="viewerExpireText">--</span>
                 </div>
-                <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? currentViewingDoc.title : null)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition">
+                <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition">
                     <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
                     <span>Báo lỗi</span>
                 </button>
@@ -347,7 +347,7 @@
 
         <div class="relative flex-1 w-full bg-white overflow-hidden">
             <iframe id="studyHtmlIframe" title="Nội dung ôn tập" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
-            <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? currentViewingDoc.title : null)" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-950/30 border border-rose-400/40 transition transform hover:scale-105 active:scale-95">
+            <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-950/30 border border-rose-400/40 transition transform hover:scale-105 active:scale-95">
                 <i data-lucide="bug" class="w-4 h-4"></i>
                 <span>Báo lỗi môn này</span>
             </button>
@@ -518,9 +518,8 @@
         // ============================================================================
         // CONFIGURATION
         // ============================================================================
-        // SỬA LỖI 1: Đã thay bằng link API Realtime Database thực tế
         const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1565660693959675954/2AFAcHeof5PHT0M7tOF2kCoNBIYiwQS42dPAdKpNtoSGXMW28qSwCqRwgPlmVIlqvhhs";
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1566440919152984064/GVhnkij011dzXDbva6JsvytE-OJQerSV35vjOzzDCyVU2tzgFMV6r_fCEjEtyMhViIjh";
 
         const HEADER_LOGO_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
         const NOTI_IMAGE_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
@@ -550,6 +549,9 @@
         let currentViewingDoc = null;
         let currentNotification = null;
         let isAdminAuthenticated = false;
+        
+        // Mảng lưu các ID đã xóa gần đây để tránh bị "hồi sinh" khi đồng bộ
+        let recentlyDeletedIds = []; 
 
         // ============================================================================
         // INITIALIZATION
@@ -568,11 +570,11 @@
             syncFromFirebase(false);
             fetchNotification(); 
 
-            // SỬA LỖI 2: Tự động đồng bộ ngầm mỗi 7 giây (Auto Update)
+            // Tự động đồng bộ ngầm mỗi 7 giây (Auto Update)
             setInterval(() => {
-                syncFromFirebase(false); // Cập nhật tài liệu mới
-                fetchNotification();     // Cập nhật thông báo mới
-                checkAndPurgeExpiredDocuments(); // Dọn rác
+                syncFromFirebase(false); 
+                fetchNotification();     
+                checkAndPurgeExpiredDocuments(); 
                 updateLiveCountdowns();
             }, 7000);
         });
@@ -623,7 +625,6 @@
         // ============================================================================
         async function fetchNotification() {
             try {
-                // SỬA LỖI 3: Thêm ?t=Date.now() để chống lưu Cache trên điện thoại
                 const res = await fetch(`${FIREBASE_DB_URL}/notification.json?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
@@ -631,13 +632,11 @@
                         if (!currentNotification || currentNotification.content !== data.content) {
                             currentNotification = data;
                             saveLocalCache();
-                            // Chỉ hiện popup nếu nội dung thực sự thay đổi
                             showNotificationModal(data.content);
                         }
                     }
                 }
             } catch (e) {
-                // Nếu mất mạng, hiển thị thông báo cũ trong máy
                 if (currentNotification && currentNotification.content) {
                     showNotificationModal(currentNotification.content);
                 }
@@ -686,7 +685,7 @@
 
             currentNotification = payload;
             saveLocalCache();
-            showNotificationModal(content); // Hiện ngay lập tức cho admin xem
+            showNotificationModal(content);
 
             try {
                 await fetch(`${FIREBASE_DB_URL}/notification.json`, {
@@ -768,7 +767,6 @@
         // ============================================================================
         async function syncFromFirebase(showNotification = false) {
             try {
-                // SỬA LỖI 4: Thêm ?t=Date.now() vào link fetch để trình duyệt điện thoại không lấy dữ liệu cũ (Cache)
                 const [docsRes, reportsRes] = await Promise.all([
                     fetch(`${FIREBASE_DB_URL}/documents.json?t=${Date.now()}`),
                     fetch(`${FIREBASE_DB_URL}/reports.json?t=${Date.now()}`)
@@ -779,7 +777,10 @@
                     const parsedDocs = [];
                     if (docsData && typeof docsData === "object") {
                         for (const [key, val] of Object.entries(docsData)) {
-                            if (val && typeof val === "object") parsedDocs.push({ ...val, id: key });
+                            // Bỏ qua nếu tài liệu này vừa mới bị xóa (tránh đồng bộ chậm gây hồi sinh)
+                            if (!recentlyDeletedIds.includes(key) && val && typeof val === "object") {
+                                parsedDocs.push({ ...val, id: key });
+                            }
                         }
                     }
                     parsedDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -806,7 +807,6 @@
 
                 if (showNotification) showToast("Đã đồng bộ dữ liệu mới nhất!", "success");
             } catch (err) {
-                // Nếu rớt mạng, vẫn hiển thị dữ liệu từ LocalStorage
                 await checkAndPurgeExpiredDocuments();
             }
         }
@@ -826,6 +826,7 @@
             }
 
             for (const expDoc of expiredDocs) {
+                recentlyDeletedIds.push(expDoc.id);
                 try { await fetch(`${FIREBASE_DB_URL}/documents/${expDoc.id}.json`, { method: "DELETE" }); } catch (e) {}
             }
 
@@ -1144,10 +1145,28 @@
         }
 
         async function deleteDocumentById(docId) {
-            studyDocuments = studyDocuments.filter(d => d.id !== docId);
-            saveLocalCache(); renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
-            try { await fetch(`${FIREBASE_DB_URL}/documents/${docId}.json`, { method: "DELETE" }); } catch (e) {}
-            showToast("Đã xóa tài liệu.", "info");
+            // Xác nhận trước khi xóa
+            if (!confirm("Bạn có chắc chắn muốn xóa tài liệu này không?")) return;
+
+            showToast("Đang tiến hành xóa...", "info");
+            
+            try {
+                const res = await fetch(`${FIREBASE_DB_URL}/documents/${docId}.json`, { method: "DELETE" });
+                if (!res.ok) throw new Error("Lỗi kết nối Firebase");
+
+                // Đánh dấu ID đã xóa để chống đồng bộ ngược
+                recentlyDeletedIds.push(docId);
+                
+                // Xóa thành công mới xóa khỏi giao diện
+                studyDocuments = studyDocuments.filter(d => d.id !== docId);
+                saveLocalCache(); 
+                renderSubjectTabs(); 
+                renderStudyMaterials(); 
+                renderAdminLists();
+                showToast("Đã xóa tài liệu thành công.", "success");
+            } catch (e) {
+                showToast("Không thể xóa tài liệu trên server. Vui lòng thử lại!", "error");
+            }
         }
 
         function renderAdminLists() {
@@ -1219,7 +1238,7 @@
         }
 
         // ============================================================================
-        // REPORTING
+        // REPORTING (FIXED)
         // ============================================================================
         function openErrorReportModal(preselectedSubject = null, docTitleContext = null) {
             const modal = document.getElementById("errorReportModal");
@@ -1250,8 +1269,22 @@
             submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Đang gửi...</span>`;
             lucide.createIcons();
 
-            const reportData = { subject, studentName, studentClass, content, docTitle: currentViewingDoc ? currentViewingDoc.title : "Chung", createdAt: Date.now() };
+            // Đảm bảo lấy đúng tiêu đề kể cả khi đang xem trong iframe
+            let docTitleContext = "Chung";
+            if (currentViewingDoc) {
+                docTitleContext = currentViewingDoc.title || currentViewingDoc.fileName || "Chung";
+            }
 
+            const reportData = { 
+                subject, 
+                studentName, 
+                studentClass, 
+                content, 
+                docTitle: docTitleContext, 
+                createdAt: Date.now() 
+            };
+
+            // Gửi Discord
             try {
                 await fetch(DISCORD_WEBHOOK_URL, {
                     method: "POST",
@@ -1271,31 +1304,41 @@
                         }]
                     })
                 });
-            } catch (e) {}
+            } catch (e) { console.warn("Lỗi gửi Discord:", e); }
 
+            // Gửi Firebase (Bắt buộc phải thành công thì mới báo thành công cho user)
+            let isSavedToFirebase = false;
             try {
                 const fbRes = await fetch(`${FIREBASE_DB_URL}/reports.json`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(reportData)
                 });
+                
                 if (fbRes.ok) {
                     const fbJson = await fbRes.json();
                     reportData.id = fbJson.name || ("rep_" + Date.now());
-                } else reportData.id = "rep_" + Date.now();
-            } catch (e) { reportData.id = "rep_" + Date.now(); }
+                    isSavedToFirebase = true;
+                }
+            } catch (e) { 
+                console.warn("Lỗi gửi Firebase:", e); 
+            }
 
-            errorReports.unshift(reportData);
-            saveLocalCache(); renderAdminLists();
-
-            document.getElementById("reportStudentName").value = "";
-            document.getElementById("reportContent").value = "";
             submitBtn.disabled = false;
             submitBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>Gửi Báo Lỗi</span>`;
             lucide.createIcons();
 
-            closeErrorReportModal();
-            showToast("Đã gửi báo lỗi thành công!", "success");
+            if (isSavedToFirebase) {
+                errorReports.unshift(reportData);
+                saveLocalCache(); 
+                renderAdminLists();
+                document.getElementById("reportStudentName").value = "";
+                document.getElementById("reportContent").value = "";
+                closeErrorReportModal();
+                showToast("Đã gửi báo lỗi thành công tới Admin!", "success");
+            } else {
+                showToast("Lỗi mạng! Không thể gửi báo cáo đến Admin. Vui lòng thử lại!", "error");
+            }
         }
 
         // ============================================================================

@@ -42,29 +42,13 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-x: contain;
         }
-        .dark .custom-scrollbar {
-            scrollbar-color: #475569 transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-            border-radius: 999px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 999px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #818cf8;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #818cf8;
-        }
+        .dark .custom-scrollbar { scrollbar-color: #475569 transparent; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-radius: 999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #818cf8; }
     </style>
 
     <script>
@@ -247,12 +231,21 @@
                         </form>
                     </div>
 
+                    <!-- Form Gửi Thông Báo -->
                     <div class="glass-panel rounded-3xl p-6 sm:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400"><i data-lucide="bell" class="w-5 h-5"></i></div>
                             <h2 class="text-lg font-bold text-slate-900 dark:text-white">Gửi Thông Báo</h2>
                         </div>
                         <form id="adminNotiForm" onsubmit="handleUpdateNotification(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Loại thông báo <span class="text-rose-500">*</span></label>
+                                <select id="adminNotiType" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="general">📢 Thông Báo Chung</option>
+                                    <option value="update">🚀 Cập Nhật Tính Năng</option>
+                                    <option value="fix">🔧 Sửa Lỗi</option>
+                                </select>
+                            </div>
                             <textarea id="adminNotiContent" rows="3" required placeholder="Nhập nội dung thông báo tới học sinh..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 resize-none"></textarea>
                             <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white font-bold text-sm shadow-md flex justify-center items-center gap-2 transition"><i data-lucide="send" class="w-4 h-4"></i> Gửi Ngay</button>
                         </form>
@@ -432,14 +425,18 @@
     <!-- MODAL: THÔNG BÁO TOÀN CẦU (GỬI TỪ ADMIN) -->
     <div id="globalNotiPopup" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center relative overflow-hidden">
+            <!-- Header (Thay đổi động dựa vào Loại thông báo) -->
+            <div id="globalNotiHeader" class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center relative overflow-hidden">
                 <div class="absolute inset-0 opacity-10 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-48 h-48 text-white"></i></div>
                 <div class="relative z-10 flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex"><i data-lucide="bell" class="w-10 h-10 text-white"></i></div>
+                    <div id="globalNotiIconWrap" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex">
+                        <i id="globalNotiIcon" data-lucide="bell" class="w-10 h-10 text-white"></i>
+                    </div>
                     <h2 class="text-3xl font-black text-white tracking-wider" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">TLOT8</h2>
-                    <p class="text-sm font-semibold text-blue-100 uppercase tracking-widest mt-1">Thông Báo Mới</p>
+                    <p id="globalNotiSubtitle" class="text-sm font-semibold text-blue-100 uppercase tracking-widest mt-1">Thông Báo Mới</p>
                 </div>
             </div>
+            
             <div class="p-6 bg-white dark:bg-slate-800">
                 <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 mb-6">
                     <p id="globalNotiPopupContent" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium"></p>
@@ -456,12 +453,12 @@
 
     <script>
         const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const DISCORD_WEBHOOK_URL = "PDg7JEtlbkEwBhINMEBUHFU7IWA1SDZuGTENCQEwWUMdB2F6eWMBa3NeYl9UVmoDAgYDYWMVEW0TeF0SPC02OUZIRloYYXc5fG8FCWcjWV07YUdlY2YGGS12ODcINjlXCTZaeWF6GAp2YX4XGxctJxddamNWdFw+fw==";
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1565660693959675954/2AFAcHeof5PHT0M7tOF2kCoNBIYiwQS42dPAdKpNtoSGXMW28qSwCqRwgPlmVIlqvhhs";
         const HEADER_LOGO_URL = "https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png"; 
 
         const LOCAL_STORAGE_DOCS_KEY = "tailieuontap8_docs_v1";
         const LOCAL_STORAGE_REPORTS_KEY = "tailieuontap8_reports_v1";
-        const LOCAL_STORAGE_NOTI_KEY = "tailieuontap8_noti_v2"; 
+        const LOCAL_STORAGE_NOTI_KEY = "tailieuontap8_noti_v3"; // Tăng version lên v3 vì đổi cấu trúc thêm type
         const LOCAL_STORAGE_AUTH_KEY = "tailieuontap8_auth_v1";
         const LOCAL_STORAGE_BOOKMARKS_KEY = "tailieuontap8_bookmarks_v1";
         const LOCAL_STORAGE_SEEN_REPLIES_KEY = "tailieuontap8_seen_replies_v1";
@@ -516,11 +513,9 @@
 
             syncFromFirebase(false);
 
-            // Gắn listener cho thanh tab môn học (scrollbar + shadow 2 mép)
             const _tabsEl = document.getElementById("subjectTabsContainer");
             if (_tabsEl) _tabsEl.addEventListener("scroll", updateTabScrollShadows, { passive: true });
             window.addEventListener("resize", updateTabScrollShadows);
-            // Cập nhật shadow lần đầu sau khi render
             setTimeout(updateTabScrollShadows, 100);
             
             setInterval(() => {
@@ -530,7 +525,6 @@
             }, 7000);
         });
 
-        // ====== HÀM CẬP NHẬT SHADOW BÁO HIỆU CÒN NỘI DUNG BỊ KHUẤT ======
         function updateTabScrollShadows() {
             const container = document.getElementById("subjectTabsContainer");
             const leftShadow = document.getElementById("tabShadowLeft");
@@ -644,9 +638,27 @@
             listEl.innerHTML = notificationsList.length === 0 ? `<p class="text-center text-slate-500 py-6">Chưa có thông báo nào.</p>`
                 : notificationsList.map(n => {
                     if (!seenGlobalNotis.includes(n.id)) seenGlobalNotis.push(n.id);
+                    
+                    let badgeColor = "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+                    let badgeText = "Thông Báo";
+                    let iconName = "bell";
+
+                    if (n.type === 'update') {
+                        badgeColor = "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
+                        badgeText = "Cập Nhật";
+                        iconName = "sparkles";
+                    } else if (n.type === 'fix') {
+                        badgeColor = "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
+                        badgeText = "Sửa Lỗi";
+                        iconName = "wrench";
+                    }
+
                     return `
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                        <p class="text-xs text-slate-400 mb-2 font-medium flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${new Date(n.createdAt).toLocaleString('vi-VN')}</p>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${badgeText}</span>
+                            <p class="text-[10px] text-slate-400 font-medium flex items-center gap-1.5"><i data-lucide="clock" class="w-3 h-3"></i> ${new Date(n.createdAt).toLocaleString('vi-VN')}</p>
+                        </div>
                         <p class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">${escapeHtml(n.content)}</p>
                     </div>`;
                 }).join("");
@@ -660,12 +672,13 @@
         async function handleUpdateNotification(e) {
             e.preventDefault();
             const content = document.getElementById("adminNotiContent").value.trim();
+            const type = document.getElementById("adminNotiType").value;
             if (!content) return;
-            const newNoti = { id: "noti_" + Date.now(), content, createdAt: Date.now() };
+            
+            const newNoti = { id: "noti_" + Date.now(), content, type, createdAt: Date.now() };
             notificationsList.unshift(newNoti); saveLocalCache();
             
-            // Hiển thị ngay lập tức cho Admin
-            showGlobalNotiPopup(content, newNoti.id);
+            showGlobalNotiPopup(content, newNoti.id, type);
 
             try {
                 await fetch(`${FIREBASE_DB_URL}/notifications.json`, { method: "PUT", body: JSON.stringify(notificationsList) });
@@ -673,13 +686,42 @@
             } catch (err) { showToast("Đã lưu cục bộ (Lỗi Firebase).", "info"); }
         }
 
-        function showGlobalNotiPopup(content, id) {
+        function showGlobalNotiPopup(content, id, type = 'general') {
+            const header = document.getElementById("globalNotiHeader");
+            const icon = document.getElementById("globalNotiIcon");
+            const subtitle = document.getElementById("globalNotiSubtitle");
+            
+            // Default values
+            let gradientClass = "bg-gradient-to-br from-blue-600 to-indigo-700";
+            let iconName = "bell";
+            let subText = "Thông Báo Mới";
+            let textColor = "text-blue-100";
+
+            if (type === 'update') {
+                gradientClass = "bg-gradient-to-br from-emerald-500 to-teal-600";
+                iconName = "sparkles";
+                subText = "Cập Nhật Tính Năng";
+                textColor = "text-emerald-100";
+            } else if (type === 'fix') {
+                gradientClass = "bg-gradient-to-br from-orange-500 to-rose-500";
+                iconName = "wrench";
+                subText = "Bản Sửa Lỗi";
+                textColor = "text-orange-100";
+            }
+
+            header.className = `${gradientClass} p-6 text-center relative overflow-hidden`;
+            icon.setAttribute("data-lucide", iconName);
+            subtitle.className = `text-sm font-semibold ${textColor} uppercase tracking-widest mt-1`;
+            subtitle.textContent = subText;
+
             document.getElementById("globalNotiPopupContent").textContent = content;
             document.getElementById("globalNotiPopup").classList.remove("hidden");
             document.getElementById("globalNotiPopup").classList.add("flex");
+            
             if (!seenGlobalNotis.includes(id)) seenGlobalNotis.push(id);
             localStorage.setItem(LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY, JSON.stringify(seenGlobalNotis));
             updateUnreadBadges();
+            lucide.createIcons();
         }
 
         function closeGlobalNotiPopup() {
@@ -693,16 +735,15 @@
                 if (res.ok) {
                     const data = await res.json();
                     const prevNotisStr = JSON.stringify(notificationsList);
-                    notificationsList = Array.isArray(data) ? data : (data && data.content ? [{ id: "old", content: data.content, createdAt: Date.now() }] : []);
+                    notificationsList = Array.isArray(data) ? data : (data && data.content ? [{ id: "old", content: data.content, type: "general", createdAt: Date.now() }] : []);
                     
                     if (JSON.stringify(notificationsList) !== prevNotisStr) {
                         saveLocalCache();
                         updateUnreadBadges();
                         
-                        // Tự động hiển thị popup nếu có thông báo mới
                         const newNotis = notificationsList.filter(n => !seenGlobalNotis.includes(n.id));
                         if (newNotis.length > 0) {
-                            showGlobalNotiPopup(newNotis[0].content, newNotis[0].id);
+                            showGlobalNotiPopup(newNotis[0].content, newNotis[0].id, newNotis[0].type);
                         }
                     }
                 }
@@ -839,12 +880,11 @@
             lucide.createIcons();
         }
 
-        // ====== RENDER TAB (giữ vị trí cuộn + responsive mobile gọn hơn) ======
         function renderSubjectTabs() {
             const container = document.getElementById("subjectTabsContainer");
             if (!container) return;
 
-            const prevScrollLeft = container.scrollLeft; // giữ vị trí cuộn khi re-render
+            const prevScrollLeft = container.scrollLeft;
 
             const totalDocsCounter = document.getElementById("totalDocsCounter");
             if (totalDocsCounter) totalDocsCounter.textContent = `Tổng cộng: ${studyDocuments.filter(d => !d.isDraft).length} tài liệu`;
@@ -901,10 +941,7 @@
             container.innerHTML = html;
             lucide.createIcons();
 
-            // Khôi phục vị trí cuộn
             container.scrollLeft = prevScrollLeft;
-
-            // Cập nhật shadow sau khi DOM đã render
             requestAnimationFrame(updateTabScrollShadows);
         }
 
@@ -913,7 +950,6 @@
         function renderStudyMaterials() {
             const container = document.getElementById("materialsContainer");
             
-            // XỬ LÝ RIÊNG TAB PHẢN HỒI
             if (selectedSubjectFilter === "REPLIES") {
                 const myReplies = errorReports.filter(r => r.deviceId === currentDeviceId && r.adminReply);
                 myReplies.sort((a,b) => b.createdAt - a.createdAt);
@@ -962,7 +998,6 @@
                 return;
             }
 
-            // XỬ LÝ CÁC TAB MÔN HỌC BÌNH THƯỜNG
             const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
             const sortMode = document.getElementById("sortSelect")?.value || "newest";
             

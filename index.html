@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tài Liệu Ôn Tập 8 — Ôn Thi Trực Tuyến</title>
     <link rel="icon" type="image/png" href="https://i.postimg.cc/Px5Kp6gW/a7e64a36-246b-44ba-9c09-f8d8e155d9a0.png">
     
@@ -37,7 +37,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Thêm thư viện Confetti (Pháo giấy) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -51,7 +50,12 @@
         html[data-theme="amber"] { --brand-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%); --brand-solid: #f59e0b; }
         html[data-theme="violet"] { --brand-gradient: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #d946ef 100%); --brand-solid: #8b5cf6; }
         
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.3s, color 0.3s; 
+            -webkit-font-smoothing: antialiased; 
+            overflow-x: hidden;
+        }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -72,7 +76,6 @@
         .custom-scrollbar::-webkit-scrollbar { height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-radius: 999px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #818cf8; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
 
         .pretty-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -123,6 +126,9 @@
         /* Sound Swatches */
         .sound-swatch { transition: all 0.2s; cursor: pointer; }
         .sound-swatch.active { background: var(--brand-gradient); color: white; border-color: transparent; }
+
+        /* Safe area for mobile bottom nav */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 
     <script>
@@ -131,34 +137,35 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
-        // Load Color Theme
         const savedColorTheme = localStorage.getItem('colorTheme') || 'indigo';
         if (savedColorTheme !== 'indigo') document.documentElement.setAttribute('data-theme', savedColorTheme);
     </script>
 </head>
 <body class="min-h-screen flex flex-col mesh-bg text-slate-800 dark:bg-[#0f172a] dark:text-slate-200 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Top Header -->
+    <!-- Top Header (Tối ưu cho Mobile) -->
     <header class="sticky top-0 z-30 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 cursor-pointer group" onclick="switchMainView('study'); playSound('click');">
-                <div class="relative">
-                    <img id="headerLogoImg" src="" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-lg shadow-indigo-500/30 hidden">
-                    <div id="headerLogoFallback" class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform" style="background: var(--brand-gradient);">
-                        <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0" onclick="switchMainView('study'); playSound('click');">
+                <div class="relative shrink-0">
+                    <img id="headerLogoImg" src="" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover shadow-lg shadow-indigo-500/30 hidden">
+                    <div id="headerLogoFallback" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform" style="background: var(--brand-gradient);">
+                        <i data-lucide="graduation-cap" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
                     </div>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white">Tài Liệu Ôn Tập 8</h1>
-                        <span id="userGreeting" class="hidden sm:inline-block text-xs font-bold text-slate-500"></span>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white whitespace-nowrap truncate">Tài Liệu Ôn Tập 8</h1>
+                        <span id="userGreeting" class="hidden lg:inline-block text-xs font-bold text-slate-500 truncate"></span>
                     </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium -mt-0.5 hidden sm:block">Ôn tập thông minh • Học tập hiệu quả</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium -mt-0.5 hidden sm:block">Ôn tập thông minh • Học tập hiệu quả</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3">
-                <!-- Streak indicator -->
+            <!-- Actions -->
+            <div class="flex items-center gap-1 sm:gap-3 shrink-0">
+                <!-- Streak (Ẩn trên mobile) -->
                 <div id="streakIndicator" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800">
                     <span class="streak-flame text-base">🔥</span>
                     <span id="streakCount" class="text-xs font-black text-orange-600 dark:text-orange-400">0</span>
@@ -166,57 +173,59 @@
                 </div>
 
                 <!-- Settings -->
-                <button onclick="openSettings()" title="Cài đặt" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-95">
-                    <i data-lucide="settings" class="w-5 h-5"></i>
+                <button onclick="openSettings()" title="Cài đặt" class="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-95">
+                    <i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </button>
 
                 <!-- Dark Mode Toggle -->
-                <button onclick="toggleDarkMode(); playSound('click');" title="Đổi chế độ sáng/tối" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-95">
-                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                <button onclick="toggleDarkMode(); playSound('click');" title="Đổi chế độ sáng/tối" class="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-95">
+                    <i data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden"></i>
                 </button>
 
-                <!-- Nav Tabs -->
-                <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <!-- Nav Tabs (Ẩn trên Mobile, hiện trên Desktop) -->
+                <div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                     <button id="navStudyBtn" onclick="switchMainView('study'); playSound('click');" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition">
-                        <i data-lucide="book-open" class="w-4 h-4"></i><span class="hidden sm:inline">Ôn Tập</span>
+                        <i data-lucide="book-open" class="w-4 h-4"></i><span>Ôn Tập</span>
                     </button>
                     <button id="navAdminBtn" onclick="openAdminLogin(); playSound('click');" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
-                        <i data-lucide="shield-check" class="w-4 h-4"></i><span class="hidden sm:inline">Admin</span>
+                        <i data-lucide="shield-check" class="w-4 h-4"></i><span>Admin</span>
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+    <!-- Main Content (Thêm padding-bottom cho mobile để không bị Bottom Nav che) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-10 pb-24 md:pb-8">
+        
         <!-- ==================== STUDENT VIEW ==================== -->
-        <section id="studyView" class="space-y-7">
+        <section id="studyView" class="space-y-6 sm:space-y-7">
             
             <!-- Hero Welcome Strip -->
             <div class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                 <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.08]" style="background: var(--brand-gradient);"></div>
                 <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-20 blur-3xl" style="background: var(--brand-gradient);"></div>
-                <div class="relative p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="relative p-5 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
                     <div class="flex-1">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 mb-3">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
                             <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Đang hoạt động</span>
                         </div>
-                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+                        <h2 class="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2 leading-tight">
                             <span id="heroGreeting">Chào mừng trở lại!</span> <span class="gradient-text">Sẵn sàng ôn tập?</span>
                         </h2>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 max-w-xl">
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl">
                             Khám phá kho tài liệu ôn tập phong phú, được cập nhật liên tục. Chọn môn học yêu thích và bắt đầu ngay hôm nay.
                         </p>
                     </div>
-                    <div class="flex gap-3 shrink-0 flex-wrap">
-                        <button onclick="openNotificationHistory()" class="relative flex items-center gap-2 px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm font-bold transition shadow-sm hover:shadow-md">
+                    <div class="flex gap-2 sm:gap-3 shrink-0 flex-wrap">
+                        <button onclick="openNotificationHistory()" class="flex-1 sm:flex-none justify-center relative flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-bold transition shadow-sm hover:shadow-md">
                             <i data-lucide="bell" class="w-4 h-4"></i>
                             Bảng tin
-                            <span id="unreadNotiBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 font-black">!</span>
+                            <span id="unreadNotiBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-rose-500 text-white text-[9px] sm:text-[10px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 font-black">!</span>
                         </button>
-                        <button onclick="openErrorReportModal()" class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-sm font-bold transition">
+                        <button onclick="openErrorReportModal()" class="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs sm:text-sm font-bold transition">
                             <i data-lucide="flag" class="w-4 h-4"></i>
                             Báo lỗi
                         </button>
@@ -225,29 +234,26 @@
             </div>
 
             <!-- Subject Tabs -->
-            <div class="relative -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div id="tabShadowLeft" class="pointer-events-none absolute left-4 sm:left-0 top-0 bottom-3 w-10 bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/90 z-10 opacity-0 transition-opacity duration-200"></div>
-
-                <div id="subjectTabsContainer"
-                     class="custom-scrollbar flex overflow-x-auto gap-2 sm:gap-2.5 pb-3 pt-1 snap-x snap-proximity"></div>
-
-                <div id="tabShadowRight" class="pointer-events-none absolute right-4 sm:right-0 top-0 bottom-3 w-10 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/90 z-10 opacity-0 transition-opacity duration-200"></div>
+            <div class="relative -mx-3 sm:mx-0 px-3 sm:px-0">
+                <div id="tabShadowLeft" class="pointer-events-none absolute left-3 sm:left-0 top-0 bottom-3 w-8 sm:w-10 bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/90 z-10 opacity-0 transition-opacity duration-200"></div>
+                <div id="subjectTabsContainer" class="custom-scrollbar flex overflow-x-auto gap-2 pb-3 pt-1 snap-x snap-proximity"></div>
+                <div id="tabShadowRight" class="pointer-events-none absolute right-3 sm:right-0 top-0 bottom-3 w-8 sm:w-10 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent dark:from-[#0f172a] dark:via-[#0f172a]/90 z-10 opacity-0 transition-opacity duration-200"></div>
             </div>
 
             <!-- Subject Banner & Sort -->
-            <div id="bannerContainer" class="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div id="bannerIconBox" class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                        <i data-lucide="layout-grid" class="w-7 h-7"></i>
+            <div id="bannerContainer" class="glass-panel rounded-3xl p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div id="bannerIconBox" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <i data-lucide="layout-grid" class="w-6 h-6 sm:w-7 sm:h-7"></i>
                     </div>
                     <div>
-                        <h3 id="bannerTitle" class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Tất cả các môn học</h3>
-                        <p id="bannerSub" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Khám phá và chọn bài ôn tập cho bạn.</p>
+                        <h3 id="bannerTitle" class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">Tất cả các môn học</h3>
+                        <p id="bannerSub" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1">Khám phá và chọn bài ôn tập cho bạn.</p>
                     </div>
                 </div>
-                <div id="sortContainer" class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto">
+                <div id="sortContainer" class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto mt-2 md:mt-0">
                     <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 ml-1"></i>
-                    <select id="sortSelect" onchange="renderStudyMaterials()" class="bg-transparent text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none w-full md:w-auto cursor-pointer pr-6">
+                    <select id="sortSelect" onchange="renderStudyMaterials()" class="bg-transparent text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 focus:outline-none w-full md:w-auto cursor-pointer pr-4">
                         <option value="newest">Mới nhất</option>
                         <option value="views">Xem nhiều nhất</option>
                         <option value="expiring">Sắp hết hạn</option>
@@ -257,59 +263,57 @@
             </div>
 
             <!-- Materials Grid -->
-            <div id="materialsContainer" class="space-y-10"></div>
+            <div id="materialsContainer" class="space-y-8 sm:space-y-10"></div>
         </section>
 
         <!-- ==================== ADMIN VIEW ==================== -->
         <section id="adminView" class="hidden space-y-8">
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Bảng điều khiển</h2>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Quản lý tài liệu, báo cáo và thông báo của hệ thống.</p>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Bảng điều khiển</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Quản lý tài liệu, báo cáo và thông báo.</p>
                 </div>
-                <button onclick="logoutAdmin()" class="text-sm text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1.5 transition px-4 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/30">
+                <button onclick="logoutAdmin()" class="text-xs sm:text-sm text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1.5 transition px-3 sm:px-4 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/30">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Đăng xuất
                 </button>
             </div>
 
-            <!-- Cảnh báo sắp hết hạn -->
             <div id="expiryAlert" class="hidden p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700 flex items-start gap-3">
                 <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
                 <div class="flex-1">
-                    <p class="text-sm font-black text-amber-800 dark:text-amber-300">Có <span id="expiryCount">0</span> tài liệu sắp hết hạn (dưới 2 ngày)!</p>
-                    <p id="expiryList" class="text-xs text-amber-700 dark:text-amber-400 mt-1 truncate"></p>
+                    <p class="text-xs sm:text-sm font-black text-amber-800 dark:text-amber-300">Có <span id="expiryCount">0</span> tài liệu sắp hết hạn (dưới 2 ngày)!</p>
+                    <p id="expiryList" class="text-[10px] sm:text-xs text-amber-700 dark:text-amber-400 mt-1 truncate"></p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-                <div class="glass-panel rounded-3xl p-5 flex items-center gap-4 stat-card text-indigo-500">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"><i data-lucide="files" class="w-6 h-6"></i></div>
-                    <div class="min-w-0"><p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Tài liệu</p><h3 id="statDocs" class="text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+                <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 stat-card text-indigo-500">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"><i data-lucide="files" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div class="min-w-0"><p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Tài liệu</p><h3 id="statDocs" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
                 </div>
-                <div class="glass-panel rounded-3xl p-5 flex items-center gap-4 stat-card text-emerald-500">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><i data-lucide="eye" class="w-6 h-6"></i></div>
-                    <div class="min-w-0"><p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Lượt xem</p><h3 id="statViews" class="text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
+                <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 stat-card text-emerald-500">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><i data-lucide="eye" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div class="min-w-0"><p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Lượt xem</p><h3 id="statViews" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
                 </div>
-                <div class="glass-panel rounded-3xl p-5 flex items-center gap-4 stat-card text-rose-500">
-                    <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-6 h-6"></i></div>
-                    <div class="min-w-0"><p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Báo lỗi</p><h3 id="statReports" class="text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
+                <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 stat-card text-rose-500">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div class="min-w-0"><p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Báo lỗi</p><h3 id="statReports" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">0</h3></div>
                 </div>
-                <div class="glass-panel rounded-3xl p-5 flex flex-col justify-center gap-2 text-slate-500">
-                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Hệ thống</p>
+                <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col justify-center gap-2 text-slate-500 col-span-2 md:col-span-1">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Hệ thống</p>
                     <div class="flex gap-2">
-                        <button onclick="exportData()" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex justify-center items-center gap-1.5 shadow-sm active:scale-95"><i data-lucide="download" class="w-3.5 h-3.5"></i> Backup</button>
-                        <label for="restoreFile" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex justify-center items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Restore</label>
+                        <button onclick="exportData()" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex justify-center items-center gap-1.5 shadow-sm active:scale-95"><i data-lucide="download" class="w-3.5 h-3.5"></i> Backup</button>
+                        <label for="restoreFile" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex justify-center items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Restore</label>
                         <input type="file" id="restoreFile" accept=".json" class="hidden" onchange="importData(event)">
                     </div>
                 </div>
             </div>
 
-            <!-- Analytics Panel -->
-            <div class="glass-panel rounded-3xl p-5 sm:p-6">
+            <div class="glass-panel rounded-3xl p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Top tài liệu xem nhiều nhất</h3>
+                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Top tài liệu xem nhiều nhất</h3>
                     </div>
                     <button onclick="toggleAnalytics()" id="analyticsToggleBtn" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Ẩn</button>
                 </div>
@@ -319,108 +323,110 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div class="lg:col-span-5 space-y-6">
                     <!-- Upload Form -->
-                    <div class="glass-panel rounded-3xl p-6 sm:p-7">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0" style="background: var(--brand-gradient);"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
+                    <div class="glass-panel rounded-3xl p-5 sm:p-7">
+                        <div class="flex items-center gap-3 mb-5 sm:mb-6">
+                            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white shrink-0" style="background: var(--brand-gradient);"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
                             <div>
-                                <h2 class="text-base font-black text-slate-900 dark:text-white">Đăng tải tài liệu</h2>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Thêm tài liệu HTML mới</p>
+                                <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Đăng tải tài liệu</h2>
+                                <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Thêm tài liệu HTML mới</p>
                             </div>
                         </div>
                         <form id="adminUploadForm" onsubmit="handleAdminUpload(event)" class="space-y-4">
                             <div>
-                                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Môn học <span class="text-rose-500">*</span></label>
-                                <select id="adminSubject" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Môn học <span class="text-rose-500">*</span></label>
+                                <select id="adminSubject" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                                     <option value="Lịch Sử và Địa Lí">Lịch Sử và Địa Lí</option><option value="Toán">Toán</option><option value="Ngữ Văn">Ngữ Văn</option>
                                     <option value="Công Nghệ">Công Nghệ</option><option value="Tin Học">Tin Học</option><option value="Khoa Học Tự Nhiên">Khoa Học Tự Nhiên</option><option value="Tiếng Anh">Tiếng Anh</option>
                                 </select>
                             </div>
-                            <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tiêu đề hiển thị</label><input type="text" id="adminDocTitle" placeholder="VD: Đề cương giữa kì 1..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
-                            <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tags (cách nhau bởi dấu phẩy)</label><input type="text" id="adminDocTags" placeholder="VD: Giữa kì, Nâng cao..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                            <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tiêu đề hiển thị</label><input type="text" id="adminDocTitle" placeholder="VD: Đề cương giữa kì 1..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                            <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tags (cách nhau bởi dấu phẩy)</label><input type="text" id="adminDocTags" placeholder="VD: Giữa kì, Nâng cao..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
                             <div>
-                                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Nội dung (HTML) <span class="text-rose-500">*</span></label>
-                                <label for="adminHtmlFile" class="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-2xl bg-slate-50 dark:bg-slate-800/50 cursor-pointer text-center transition group">
-                                    <i data-lucide="file-code" class="w-8 h-8 text-indigo-400 mb-3 group-hover:scale-110 transition-transform"></i>
-                                    <p id="selectedFileName" class="text-sm font-bold text-slate-700 dark:text-slate-300">Bấm chọn file <span class="text-indigo-600">.html</span></p>
+                                <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nội dung (HTML) <span class="text-rose-500">*</span></label>
+                                <label for="adminHtmlFile" class="flex flex-col items-center justify-center w-full p-4 sm:p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-2xl bg-slate-50 dark:bg-slate-800/50 cursor-pointer text-center transition group">
+                                    <i data-lucide="file-code" class="w-6 h-6 sm:w-8 sm:h-8 text-indigo-400 mb-2 sm:mb-3 group-hover:scale-110 transition-transform"></i>
+                                    <p id="selectedFileName" class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">Bấm chọn file <span class="text-indigo-600">.html</span></p>
                                     <input id="adminHtmlFile" type="file" accept=".html,.htm" class="hidden" onchange="handleFileSelect(event)">
                                 </label>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Ngày xóa <span class="text-rose-500">*</span></label><input type="date" id="adminDeleteDate" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
-                                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Giờ xóa <span class="text-rose-500">*</span></label><input type="time" id="adminDeleteTime" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                            <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Ngày xóa <span class="text-rose-500">*</span></label><input type="date" id="adminDeleteDate" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Giờ xóa <span class="text-rose-500">*</span></label><input type="time" id="adminDeleteTime" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
                             </div>
 
-                            <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-xl border border-amber-200 dark:border-amber-800">
-                                <input type="checkbox" id="adminIsDraft" class="w-5 h-5 text-amber-500 rounded border-amber-300 focus:ring-amber-500 cursor-pointer">
-                                <label for="adminIsDraft" class="text-sm font-bold text-amber-800 dark:text-amber-400 cursor-pointer select-none">Lưu nháp (Ẩn với học sinh)</label>
+                            <div class="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 p-2.5 sm:p-3 rounded-xl border border-amber-200 dark:border-amber-800">
+                                <input type="checkbox" id="adminIsDraft" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 rounded border-amber-300 focus:ring-amber-500 cursor-pointer">
+                                <label for="adminIsDraft" class="text-xs sm:text-sm font-bold text-amber-800 dark:text-amber-400 cursor-pointer select-none">Lưu nháp (Ẩn với học sinh)</label>
                             </div>
 
-                            <div class="pt-1 flex gap-2">
-                                <button type="button" onclick="previewSelectedHtmlBeforeUpload()" id="previewDraftBtn" disabled class="px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 transition"><i data-lucide="eye" class="w-4 h-4 inline mr-1"></i> Xem thử</button>
-                                <button type="submit" id="uploadSubmitBtn" class="flex-1 py-3 rounded-xl text-white font-bold text-sm btn-glow flex justify-center items-center gap-2 transition active:scale-95" style="background: var(--brand-gradient);"><i data-lucide="send" class="w-4 h-4"></i> Đăng Lên Web</button>
+                            <div class="pt-1 flex flex-col sm:flex-row gap-2">
+                                <button type="button" onclick="previewSelectedHtmlBeforeUpload()" id="previewDraftBtn" disabled class="w-full sm:w-auto px-4 py-2.5 sm:py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 transition"><i data-lucide="eye" class="w-4 h-4 inline mr-1"></i> Xem thử</button>
+                                <button type="submit" id="uploadSubmitBtn" class="flex-1 py-2.5 sm:py-3 rounded-xl text-white font-bold text-xs sm:text-sm btn-glow flex justify-center items-center gap-2 transition active:scale-95" style="background: var(--brand-gradient);"><i data-lucide="send" class="w-4 h-4"></i> Đăng Lên Web</button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Notification Form -->
-                    <div class="glass-panel rounded-3xl p-6 sm:p-7">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div>
+                    <div class="glass-panel rounded-3xl p-5 sm:p-7">
+                        <div class="flex items-center gap-3 mb-5 sm:mb-6">
+                            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div>
                             <div>
-                                <h2 class="text-base font-black text-slate-900 dark:text-white">Gửi thông báo</h2>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Gửi tới tất cả học sinh</p>
+                                <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Gửi thông báo</h2>
+                                <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Gửi tới tất cả học sinh</p>
                             </div>
                         </div>
                         <form id="adminNotiForm" onsubmit="handleUpdateNotification(event)" class="space-y-4">
                             <div>
-                                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Loại thông báo <span class="text-rose-500">*</span></label>
-                                <select id="adminNotiType" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Loại thông báo <span class="text-rose-500">*</span></label>
+                                <select id="adminNotiType" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                                     <option value="general">📢 Thông Báo Chung</option>
                                     <option value="update">🚀 Cập Nhật Tính Năng</option>
                                     <option value="fix">🔧 Sửa Lỗi</option>
                                 </select>
                             </div>
                             <div>
-                                <textarea id="adminNotiContent" rows="3" required placeholder="Nhập nội dung thông báo tới học sinh..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                                <textarea id="adminNotiContent" rows="3" required placeholder="Nhập nội dung thông báo..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 resize-none"></textarea>
                             </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white font-bold text-sm shadow-md flex justify-center items-center gap-2 transition active:scale-95"><i data-lucide="send" class="w-4 h-4"></i> Gửi Ngay</button>
+                            <button type="submit" class="w-full py-2.5 sm:py-3 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white font-bold text-xs sm:text-sm shadow-md flex justify-center items-center gap-2 transition active:scale-95"><i data-lucide="send" class="w-4 h-4"></i> Gửi Ngay</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Manage Lists -->
                 <div class="lg:col-span-7">
-                    <div class="glass-panel rounded-3xl p-5 sm:p-7 h-full">
-                        <div class="flex flex-wrap items-center justify-between gap-3 pb-5 mb-5 border-b border-slate-100 dark:border-slate-700">
-                            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                                <button id="adminSubTabDocs" onclick="switchAdminSubTab('docs')" class="px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition">Tài liệu</button>
-                                <button id="adminSubTabReports" onclick="switchAdminSubTab('reports')" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition flex items-center gap-2">Báo lỗi <span id="adminReportCount" class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs">0</span></button>
-                                <button id="adminSubTabTrash" onclick="switchAdminSubTab('trash')" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">Thùng rác</button>
+                    <div class="glass-panel rounded-3xl p-4 sm:p-7 h-full">
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-700">
+                            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-full sm:w-auto">
+                                <button id="adminSubTabDocs" onclick="switchAdminSubTab('docs')" class="flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition">Tài liệu</button>
+                                <button id="adminSubTabReports" onclick="switchAdminSubTab('reports')" class="flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 transition flex justify-center items-center gap-1 sm:gap-2">Báo lỗi <span id="adminReportCount" class="px-1.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-[10px]">0</span></button>
+                                <button id="adminSubTabTrash" onclick="switchAdminSubTab('trash')" class="flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 transition">Thùng rác</button>
                             </div>
-                            <div class="flex gap-2 items-center flex-wrap">
-                                <button id="bulkDeleteBtn" onclick="bulkDeleteDocs()" class="hidden px-3 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition active:scale-95">Xóa (<span id="bulkCount">0</span>)</button>
+                            <div class="flex gap-2 items-center flex-wrap w-full sm:w-auto">
+                                <button id="bulkDeleteBtn" onclick="bulkDeleteDocs()" class="hidden w-full sm:w-auto px-3 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition active:scale-95">Xóa (<span id="bulkCount">0</span>)</button>
                             </div>
                         </div>
 
                         <!-- Search & Filter Bar -->
                         <div class="mb-4 space-y-2">
-                            <div id="adminDocsFilter" class="flex gap-2 flex-wrap">
-                                <div class="relative flex-1 min-w-[180px]">
+                            <div id="adminDocsFilter" class="flex flex-col sm:flex-row gap-2 flex-wrap">
+                                <div class="relative flex-1 min-w-full sm:min-w-[180px]">
                                     <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                                     <input type="text" id="adminSearchInput" oninput="renderAdminLists()" placeholder="Tìm theo tiêu đề..." class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                                 </div>
-                                <select id="adminSubjectFilter" onchange="renderAdminLists()" class="px-3 py-2 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none">
-                                    <option value="ALL">Tất cả môn</option>
-                                    <option value="Lịch Sử và Địa Lí">Sử - Địa</option><option value="Toán">Toán</option><option value="Ngữ Văn">Ngữ Văn</option>
-                                    <option value="Công Nghệ">Công Nghệ</option><option value="Tin Học">Tin Học</option><option value="Khoa Học Tự Nhiên">KHTN</option><option value="Tiếng Anh">Tiếng Anh</option>
-                                </select>
-                                <select id="adminSortFilter" onchange="renderAdminLists()" class="px-3 py-2 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none">
-                                    <option value="newest">Mới nhất</option>
-                                    <option value="title">Theo tên</option>
-                                    <option value="views">Xem nhiều</option>
-                                    <option value="expiring">Sắp hết hạn</option>
-                                </select>
+                                <div class="flex gap-2">
+                                    <select id="adminSubjectFilter" onchange="renderAdminLists()" class="flex-1 px-2 sm:px-3 py-2 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none">
+                                        <option value="ALL">Tất cả môn</option>
+                                        <option value="Lịch Sử và Địa Lí">Sử - Địa</option><option value="Toán">Toán</option><option value="Ngữ Văn">Ngữ Văn</option>
+                                        <option value="Công Nghệ">Công Nghệ</option><option value="Tin Học">Tin Học</option><option value="Khoa Học Tự Nhiên">KHTN</option><option value="Tiếng Anh">Tiếng Anh</option>
+                                    </select>
+                                    <select id="adminSortFilter" onchange="renderAdminLists()" class="flex-1 px-2 sm:px-3 py-2 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 focus:outline-none">
+                                        <option value="newest">Mới nhất</option>
+                                        <option value="title">Theo tên</option>
+                                        <option value="views">Xem nhiều</option>
+                                        <option value="expiring">Sắp hết hạn</option>
+                                    </select>
+                                </div>
                             </div>
                             <div id="adminReportsFilter" class="hidden gap-2 flex-wrap">
                                 <button onclick="setReportFilter('all')" data-rfilter="all" class="filter-pill active px-3 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">Tất cả</button>
@@ -429,101 +435,110 @@
                             </div>
                         </div>
 
-                        <div id="adminDocsListWrapper" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-2 pretty-scrollbar"></div>
-                        <div id="adminReportsListWrapper" class="hidden space-y-2.5 max-h-[580px] overflow-y-auto pr-2 pretty-scrollbar"></div>
-                        <div id="adminTrashListWrapper" class="hidden space-y-2.5 max-h-[580px] overflow-y-auto pr-2 pretty-scrollbar"></div>
+                        <div id="adminDocsListWrapper" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1 sm:pr-2 pretty-scrollbar"></div>
+                        <div id="adminReportsListWrapper" class="hidden space-y-2.5 max-h-[580px] overflow-y-auto pr-1 sm:pr-2 pretty-scrollbar"></div>
+                        <div id="adminTrashListWrapper" class="hidden space-y-2.5 max-h-[580px] overflow-y-auto pr-1 sm:pr-2 pretty-scrollbar"></div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- MOBILE BOTTOM NAVIGATION (Chỉ hiện trên mobile) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 md:hidden flex justify-around items-center h-16 pb-safe shadow-[0_-4px_20px_-2px_rgba(0,0,0,0.05)]">
+        <button onclick="switchMainView('study'); playSound('click');" id="mobileNavStudyBtn" class="flex flex-col items-center justify-center w-full h-full text-indigo-600 dark:text-indigo-400 transition">
+            <i data-lucide="book-open" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-bold">Ôn Tập</span>
+        </button>
+        <button onclick="openAdminLogin(); playSound('click');" id="mobileNavAdminBtn" class="flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 transition">
+            <i data-lucide="shield-check" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-bold">Admin</span>
+        </button>
+    </nav>
+
     <!-- MODAL: SETTINGS -->
     <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="px-6 py-5 bg-gradient-to-r from-indigo-50 to-fuchsia-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div class="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-indigo-50 to-fuchsia-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white" style="background: var(--brand-gradient);"><i data-lucide="settings" class="w-5 h-5"></i></div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Cài đặt</h3>
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white" style="background: var(--brand-gradient);"><i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Cài đặt</h3>
                 </div>
                 <button onclick="closeSettings()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div class="p-6 space-y-5">
-                <!-- Nickname -->
+            <div class="p-5 sm:p-6 space-y-4 sm:space-y-5">
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tên hiển thị (Nickname)</label>
-                    <input type="text" id="nicknameInput" placeholder="VD: Minh lớp 8/10..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white">
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tên hiển thị (Nickname)</label>
+                    <input type="text" id="nicknameInput" placeholder="VD: Minh lớp 8/10..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white">
                 </div>
                 
-                <!-- Theme Colors -->
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Màu chủ đề</label>
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Màu chủ đề</label>
                     <div class="grid grid-cols-5 gap-2" id="themeColorGrid">
-                        <button onclick="setColorTheme('indigo')" data-color="indigo" class="theme-swatch h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)" title="Indigo"></button>
-                        <button onclick="setColorTheme('emerald')" data-color="emerald" class="theme-swatch h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #10b981, #14b8a6, #06b6d4)" title="Emerald"></button>
-                        <button onclick="setColorTheme('rose')" data-color="rose" class="theme-swatch h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #f43f5e, #ec4899, #d946ef)" title="Rose"></button>
-                        <button onclick="setColorTheme('amber')" data-color="amber" class="theme-swatch h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444)" title="Amber"></button>
-                        <button onclick="setColorTheme('violet')" data-color="violet" class="theme-swatch h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #8b5cf6, #a855f7, #d946ef)" title="Violet"></button>
+                        <button onclick="setColorTheme('indigo')" data-color="indigo" class="theme-swatch h-9 sm:h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)" title="Indigo"></button>
+                        <button onclick="setColorTheme('emerald')" data-color="emerald" class="theme-swatch h-9 sm:h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #10b981, #14b8a6, #06b6d4)" title="Emerald"></button>
+                        <button onclick="setColorTheme('rose')" data-color="rose" class="theme-swatch h-9 sm:h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #f43f5e, #ec4899, #d946ef)" title="Rose"></button>
+                        <button onclick="setColorTheme('amber')" data-color="amber" class="theme-swatch h-9 sm:h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444)" title="Amber"></button>
+                        <button onclick="setColorTheme('violet')" data-color="violet" class="theme-swatch h-9 sm:h-10 rounded-xl border-2 border-transparent transition hover:scale-105" style="background: linear-gradient(135deg, #8b5cf6, #a855f7, #d946ef)" title="Violet"></button>
                     </div>
                 </div>
 
-                <!-- Sound Settings (MỚI) -->
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Âm thanh Click</label>
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Âm thanh Click</label>
                     <div class="grid grid-cols-4 gap-2" id="soundGrid">
-                        <button onclick="setSoundProfile('beep')" data-sound="beep" class="sound-swatch px-2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Beep</button>
-                        <button onclick="setSoundProfile('pop')" data-sound="pop" class="sound-swatch px-2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Pop</button>
-                        <button onclick="setSoundProfile('chime')" data-sound="chime" class="sound-swatch px-2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Chime</button>
-                        <button onclick="setSoundProfile('none')" data-sound="none" class="sound-swatch px-2 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Tắt</button>
+                        <button onclick="setSoundProfile('beep')" data-sound="beep" class="sound-swatch px-1 sm:px-2 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] sm:text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Beep</button>
+                        <button onclick="setSoundProfile('pop')" data-sound="pop" class="sound-swatch px-1 sm:px-2 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] sm:text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Pop</button>
+                        <button onclick="setSoundProfile('chime')" data-sound="chime" class="sound-swatch px-1 sm:px-2 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] sm:text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Chime</button>
+                        <button onclick="setSoundProfile('none')" data-sound="none" class="sound-swatch px-1 sm:px-2 py-2 sm:py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] sm:text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">Tắt</button>
                     </div>
                 </div>
 
-                <button onclick="saveSettings()" class="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Lưu Cài Đặt</button>
+                <button onclick="saveSettings()" class="w-full py-2.5 sm:py-3 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Lưu Cài Đặt</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: HTML VIEWER -->
-    <div id="htmlViewerModal" class="fixed inset-0 z-40 hidden flex-col bg-slate-50 dark:bg-[#0f172a]">
-        <div class="h-16 px-4 sm:px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0 shadow-sm">
-            <div class="flex items-center gap-3 min-w-0">
-                <button onclick="closeStudyViewer()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center gap-2 text-sm font-bold shrink-0 active:scale-95"><i data-lucide="arrow-left" class="w-4 h-4"></i><span class="hidden sm:inline">Quay lại</span></button>
-                <span id="viewerSubjectBadge" class="hidden sm:inline-block px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0">Môn học</span>
-                <h3 id="viewerDocTitle" class="text-base font-black text-slate-900 dark:text-white truncate">Tiêu đề tài liệu</h3>
+    <div id="htmlViewerModal" class="fixed inset-0 z-50 hidden flex-col bg-slate-50 dark:bg-[#0f172a]">
+        <div class="h-14 sm:h-16 px-3 sm:px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0 shadow-sm">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button onclick="closeStudyViewer()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center gap-1.5 text-xs sm:text-sm font-bold shrink-0 active:scale-95"><i data-lucide="arrow-left" class="w-4 h-4"></i><span class="hidden sm:inline">Quay lại</span></button>
+                <span id="viewerSubjectBadge" class="hidden sm:inline-block px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0">Môn học</span>
+                <h3 id="viewerDocTitle" class="text-xs sm:text-base font-black text-slate-900 dark:text-white truncate">Tiêu đề</h3>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i><span id="viewerExpireText">--</span></div>
-                <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition active:scale-95"><i data-lucide="alert-triangle" class="w-4 h-4"></i><span class="hidden sm:inline">Báo lỗi</span></button>
+            <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                <div class="hidden lg:flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i><span id="viewerExpireText">--</span></div>
+                <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-[10px] sm:text-xs font-bold transition active:scale-95"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i><span class="hidden sm:inline">Báo lỗi</span></button>
             </div>
         </div>
         <div class="relative flex-1 w-full bg-white dark:bg-slate-900 overflow-hidden">
             <iframe id="studyHtmlIframe" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
-            <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-2xl shadow-rose-900/50 transition transform hover:scale-105 active:scale-95"><i data-lucide="bug" class="w-5 h-5"></i> Báo lỗi bài này</button>
+            <button onclick="openErrorReportModal(currentViewingDoc ? currentViewingDoc.subject : null, currentViewingDoc ? (currentViewingDoc.title || currentViewingDoc.fileName) : null)" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-5 sm:py-3 rounded-full sm:rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-2xl shadow-rose-900/50 transition transform hover:scale-105 active:scale-95"><i data-lucide="bug" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Báo lỗi bài này</span></button>
         </div>
     </div>
 
     <!-- MODAL: NOTES -->
     <div id="notesModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="px-6 py-5 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400"><i data-lucide="sticky-note" class="w-5 h-5"></i></div>
+            <div class="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400"><i data-lucide="sticky-note" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
                     <div>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Ghi chú cá nhân</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate" id="notesDocTitle"></p>
+                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Ghi chú</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px] sm:max-w-[200px]" id="notesDocTitle"></p>
                     </div>
                 </div>
-                <button onclick="closeNotesModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeNotesModal()" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div class="p-6 space-y-3">
+            <div class="p-4 sm:p-6 space-y-3">
                 <input type="hidden" id="notesDocId">
-                <textarea id="notesContent" rows="6" placeholder="Viết ghi chú của bạn cho tài liệu này..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 resize-none"></textarea>
-                <div class="flex justify-between items-center gap-2">
-                    <button onclick="deleteNote()" class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Xóa ghi chú</button>
-                    <div class="flex gap-2">
-                        <button onclick="exportAllNotes()" title="Tải xuống toàn bộ ghi chú" class="px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-bold text-slate-700 dark:text-slate-200 transition flex items-center gap-1.5"><i data-lucide="download" class="w-3.5 h-3.5"></i> Xuất</button>
-                        <button onclick="closeNotesModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-sm font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
-                        <button onclick="saveNote()" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md flex items-center gap-1.5 transition active:scale-95"><i data-lucide="save" class="w-4 h-4"></i>Lưu</button>
+                <textarea id="notesContent" rows="5" placeholder="Viết ghi chú..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 resize-none"></textarea>
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <button onclick="deleteNote()" class="w-full sm:w-auto text-xs text-rose-500 hover:text-rose-700 font-bold flex justify-center sm:justify-start items-center gap-1 py-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Xóa ghi chú</button>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="exportAllNotes()" title="Tải xuống toàn bộ ghi chú" class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-bold text-slate-700 dark:text-slate-200 transition flex justify-center items-center gap-1.5"><i data-lucide="download" class="w-3.5 h-3.5"></i> Xuất</button>
+                        <button onclick="closeNotesModal()" class="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
+                        <button onclick="saveNote()" class="flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md flex justify-center items-center gap-1.5 transition active:scale-95"><i data-lucide="save" class="w-3.5 h-3.5"></i>Lưu</button>
                     </div>
                 </div>
             </div>
@@ -533,53 +548,53 @@
     <!-- MODAL: NOTIFICATIONS HISTORY -->
     <div id="notiHistoryModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-zoom-in">
-            <div class="px-6 py-5 bg-gradient-to-r from-indigo-50 to-fuchsia-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background: var(--brand-gradient);"><i data-lucide="bell" class="w-5 h-5"></i></div>
+            <div class="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-indigo-50 to-fuchsia-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background: var(--brand-gradient);"><i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
                     <div>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Bảng Tin Thông Báo</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Cập nhật mới nhất từ Admin</p>
+                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Bảng Tin</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Cập nhật từ Admin</p>
                     </div>
                 </div>
-                <button onclick="closeNotificationHistory()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeNotificationHistory()" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div id="notiHistoryList" class="p-5 overflow-y-auto space-y-3 bg-slate-50/50 dark:bg-slate-900/50 pretty-scrollbar"></div>
+            <div id="notiHistoryList" class="p-3 sm:p-5 overflow-y-auto space-y-3 bg-slate-50/50 dark:bg-slate-900/50 pretty-scrollbar"></div>
         </div>
     </div>
 
     <!-- MODAL: ERROR REPORT -->
-    <div id="errorReportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
+    <div id="errorReportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="px-6 py-5 bg-gradient-to-r from-rose-50 to-orange-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400"><i data-lucide="flag" class="w-5 h-5"></i></div>
+            <div class="px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-rose-50 to-orange-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400"><i data-lucide="flag" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
                     <div>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Báo Lỗi Tài Liệu</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Giúp chúng tôi cải thiện</p>
+                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Báo Lỗi</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Giúp chúng tôi cải thiện</p>
                     </div>
                 </div>
-                <button onclick="closeErrorReportModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeErrorReportModal()" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form id="errorReportForm" onsubmit="submitErrorReport(event)" class="p-6 space-y-4">
+            <form id="errorReportForm" onsubmit="submitErrorReport(event)" class="p-4 sm:p-6 space-y-3 sm:space-y-4">
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Môn <span class="text-rose-500">*</span></label>
-                    <select id="reportSubject" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Môn <span class="text-rose-500">*</span></label>
+                    <select id="reportSubject" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
                         <option value="Lịch Sử và Địa Lí">Lịch Sử và Địa Lí</option><option value="Toán">Toán</option><option value="Ngữ Văn">Ngữ Văn</option>
                         <option value="Công Nghệ">Công Nghệ</option><option value="Tin Học">Tin Học</option><option value="Khoa Học Tự Nhiên">Khoa Học Tự Nhiên</option><option value="Tiếng Anh">Tiếng Anh</option>
                     </select>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-2"><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tên <span class="text-rose-500">*</span></label><input type="text" id="reportStudentName" required placeholder="Họ tên..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"></div>
-                    <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Lớp <span class="text-rose-500">*</span></label>
-                        <select id="reportStudentClass" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div class="col-span-2"><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tên <span class="text-rose-500">*</span></label><input type="text" id="reportStudentName" required placeholder="Họ tên..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"></div>
+                    <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Lớp <span class="text-rose-500">*</span></label>
+                        <select id="reportStudentClass" required class="w-full px-2 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
                             <option value="8/10">8/10</option><option value="8/11">8/11</option><option value="8/12">8/12</option><option value="8/13">8/13</option><option value="8/14">8/14</option><option value="8/15">8/15</option>
                         </select>
                     </div>
                 </div>
-                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Nội dung <span class="text-rose-500">*</span></label><textarea id="reportContent" rows="3" required placeholder="Ghi rõ lỗi..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 resize-none"></textarea></div>
+                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Nội dung <span class="text-rose-500">*</span></label><textarea id="reportContent" rows="3" required placeholder="Ghi rõ lỗi..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 resize-none"></textarea></div>
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeErrorReportModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
-                    <button type="submit" id="submitReportBtn" class="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-600/30 flex items-center gap-2 transition active:scale-95"><i data-lucide="send" class="w-4 h-4"></i> Gửi Báo Lỗi</button>
+                    <button type="button" onclick="closeErrorReportModal()" class="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
+                    <button type="submit" id="submitReportBtn" class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-bold shadow-lg flex justify-center items-center gap-2 transition active:scale-95"><i data-lucide="send" class="w-4 h-4"></i> Gửi</button>
                 </div>
             </form>
         </div>
@@ -588,61 +603,60 @@
     <!-- MODAL: ADMIN LOGIN -->
     <div id="adminLoginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="p-6 text-center" style="background: var(--brand-gradient);">
-                <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <i data-lucide="lock" class="w-8 h-8 text-white"></i>
+            <div class="p-5 sm:p-6 text-center" style="background: var(--brand-gradient);">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg">
+                    <i data-lucide="lock" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
                 </div>
-                <h3 class="text-xl font-black text-white">Đăng Nhập Admin</h3>
-                <p class="text-sm text-indigo-100 mt-1">Chỉ dành cho quản trị viên</p>
+                <h3 class="text-lg sm:text-xl font-black text-white">Đăng Nhập Admin</h3>
             </div>
-            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
-                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tài khoản</label><input type="text" id="adminUsername" required placeholder="Nhập tài khoản..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
-                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Mật khẩu</label><input type="password" id="adminPassword" required placeholder="Nhập mật khẩu..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
-                <button type="submit" class="w-full py-3 rounded-xl text-white font-bold text-sm btn-glow flex justify-center items-center gap-2 transition active:scale-95" style="background: var(--brand-gradient);"><i data-lucide="log-in" class="w-4 h-4"></i> Đăng Nhập</button>
-                <button type="button" onclick="closeAdminLogin()" class="w-full py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white transition">Quay lại</button>
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="p-5 sm:p-6 space-y-3 sm:space-y-4">
+                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tài khoản</label><input type="text" id="adminUsername" required placeholder="Tài khoản..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mật khẩu</label><input type="password" id="adminPassword" required placeholder="Mật khẩu..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"></div>
+                <button type="submit" class="w-full py-2.5 sm:py-3 rounded-xl text-white font-bold text-xs sm:text-sm btn-glow flex justify-center items-center gap-2 transition active:scale-95" style="background: var(--brand-gradient);"><i data-lucide="log-in" class="w-4 h-4"></i> Đăng Nhập</button>
+                <button type="button" onclick="closeAdminLogin()" class="w-full py-2 rounded-xl text-[10px] sm:text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white transition">Quay lại</button>
             </form>
         </div>
     </div>
 
     <!-- MODAL: EDIT DOC -->
-    <div id="editDocModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
+    <div id="editDocModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="px-6 py-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400"><i data-lucide="edit" class="w-5 h-5"></i></div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Chỉnh Sửa Tài Liệu</h3>
+            <div class="px-4 sm:px-6 py-3 sm:py-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400"><i data-lucide="edit" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Sửa tài liệu</h3>
                 </div>
-                <button onclick="closeEditDocModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeEditDocModal()" class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form id="editDocForm" onsubmit="handleEditDocSubmit(event)" class="p-6 space-y-4">
+            <form id="editDocForm" onsubmit="handleEditDocSubmit(event)" class="p-4 sm:p-6 space-y-3 sm:space-y-4">
                 <input type="hidden" id="editDocId">
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Môn học</label>
-                    <select id="editDocSubject" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Môn học</label>
+                    <select id="editDocSubject" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500">
                         <option value="Lịch Sử và Địa Lí">Lịch Sử và Địa Lí</option><option value="Toán">Toán</option><option value="Ngữ Văn">Ngữ Văn</option>
                         <option value="Công Nghệ">Công Nghệ</option><option value="Tin Học">Tin Học</option><option value="Khoa Học Tự Nhiên">Khoa Học Tự Nhiên</option><option value="Tiếng Anh">Tiếng Anh</option>
                     </select>
                 </div>
-                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tiêu đề</label><input type="text" id="editDocTitle" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"></div>
-                <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Tags (cách nhau dấu phẩy)</label><input type="text" id="editDocTags" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"></div>
+                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tiêu đề</label><input type="text" id="editDocTitle" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"></div>
+                <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Tags (cách nhau dấu phẩy)</label><input type="text" id="editDocTags" class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"></div>
                 
                 <div>
-                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Thay thế file HTML</label>
-                    <label for="editDocFile" class="flex items-center justify-center w-full p-4 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 rounded-xl bg-slate-50 dark:bg-slate-900 cursor-pointer text-center transition">
-                        <i data-lucide="file-up" class="w-5 h-5 text-blue-500 mr-2"></i>
-                        <span id="editSelectedFileName" class="text-sm font-bold text-slate-600 dark:text-slate-400">Bấm để chọn file mới</span>
+                    <label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Thay thế file HTML</label>
+                    <label for="editDocFile" class="flex items-center justify-center w-full p-3 sm:p-4 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 rounded-xl bg-slate-50 dark:bg-slate-900 cursor-pointer text-center transition">
+                        <i data-lucide="file-up" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 mr-2"></i>
+                        <span id="editSelectedFileName" class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">Chọn file mới</span>
                         <input id="editDocFile" type="file" accept=".html,.htm" class="hidden" onchange="handleEditFileSelect(event)">
                     </label>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Ngày xóa <span class="text-rose-500">*</span></label><input type="date" id="editDocDate" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white"></div>
-                    <div><label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Giờ xóa <span class="text-rose-500">*</span></label><input type="time" id="editDocTime" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white"></div>
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Ngày xóa <span class="text-rose-500">*</span></label><input type="date" id="editDocDate" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white"></div>
+                    <div><label class="block text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Giờ xóa <span class="text-rose-500">*</span></label><input type="time" id="editDocTime" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white"></div>
                 </div>
 
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditDocModal()" class="px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-sm font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
-                    <button type="submit" id="editDocSubmitBtn" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2 transition active:scale-95"><i data-lucide="save" class="w-4 h-4"></i> Lưu Thay Đổi</button>
+                    <button type="button" onclick="closeEditDocModal()" class="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 transition">Hủy</button>
+                    <button type="submit" id="editDocSubmitBtn" class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold shadow-lg flex justify-center items-center gap-2 transition active:scale-95"><i data-lucide="save" class="w-4 h-4"></i> Lưu</button>
                 </div>
             </form>
         </div>
@@ -651,20 +665,19 @@
     <!-- MODAL: ADMIN REPLY NOTI -->
     <div id="adminReplyNotiModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div class="p-6 text-center" style="background: var(--brand-gradient);">
-                <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <i data-lucide="message-square" class="w-8 h-8 text-white"></i>
+            <div class="p-5 sm:p-6 text-center" style="background: var(--brand-gradient);">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg">
+                    <i data-lucide="message-square" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
                 </div>
-                <h3 class="text-xl font-black text-white">Phản hồi mới</h3>
-                <p class="text-sm text-indigo-100 mt-1">Từ Admin</p>
+                <h3 class="text-lg sm:text-xl font-black text-white">Phản hồi mới</h3>
             </div>
-            <div class="p-6">
-                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Về báo cáo môn</p>
-                <p class="text-sm font-black text-indigo-600 dark:text-indigo-400 mb-4" id="replyNotiSubject"></p>
-                <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-5">
-                    <p id="replyNotiContent" class="text-sm text-slate-800 dark:text-white font-medium whitespace-pre-wrap"></p>
+            <div class="p-4 sm:p-6">
+                <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Về báo cáo môn</p>
+                <p class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400 mb-3 sm:mb-4" id="replyNotiSubject"></p>
+                <div class="bg-slate-50 dark:bg-slate-900 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700 mb-4 sm:mb-5">
+                    <p id="replyNotiContent" class="text-xs sm:text-sm text-slate-800 dark:text-white font-medium whitespace-pre-wrap"></p>
                 </div>
-                <button onclick="closeAdminReplyNoti()" class="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Đã hiểu</button>
+                <button onclick="closeAdminReplyNoti()" class="w-full py-2.5 sm:py-3 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Đã hiểu</button>
             </div>
         </div>
     </div>
@@ -672,30 +685,30 @@
     <!-- MODAL: GLOBAL NOTI POPUP -->
     <div id="globalNotiPopup" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 modal-backdrop">
         <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden animate-zoom-in">
-            <div id="globalNotiHeader" class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-48 h-48 text-white"></i></div>
+            <div id="globalNotiHeader" class="bg-gradient-to-br from-blue-600 to-indigo-700 p-5 sm:p-6 text-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-32 h-32 sm:w-48 sm:h-48 text-white"></i></div>
                 <div class="relative z-10 flex flex-col items-center">
-                    <div id="globalNotiIconWrap" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-3 shadow-lg flex">
-                        <i id="globalNotiIcon" data-lucide="bell" class="w-10 h-10 text-white"></i>
+                    <div id="globalNotiIconWrap" class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30 items-center justify-center mb-2 sm:mb-3 shadow-lg flex">
+                        <i id="globalNotiIcon" data-lucide="bell" class="w-7 h-7 sm:w-10 sm:h-10 text-white"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-white tracking-wider" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">TLOT8</h2>
-                    <p id="globalNotiSubtitle" class="text-sm font-bold text-blue-100 uppercase tracking-widest mt-1">Thông Báo Mới</p>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white tracking-wider" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">TLOT8</h2>
+                    <p id="globalNotiSubtitle" class="text-xs sm:text-sm font-bold text-blue-100 uppercase tracking-widest mt-1">Thông Báo Mới</p>
                 </div>
             </div>
             
-            <div class="p-6 bg-white dark:bg-slate-800">
-                <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 mb-5">
-                    <p id="globalNotiPopupContent" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium"></p>
+            <div class="p-4 sm:p-6 bg-white dark:bg-slate-800">
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 sm:p-4 border border-slate-200 dark:border-slate-700 mb-4 sm:mb-5">
+                    <p id="globalNotiPopupContent" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-medium"></p>
                 </div>
-                <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4">
-                    <p class="text-xs text-slate-500 font-medium">Make By: <span class="text-indigo-600 font-bold">Thai Minh</span></p>
-                    <button onclick="closeGlobalNotiPopup()" class="px-6 py-2.5 rounded-xl text-white text-xs font-bold shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Đã hiểu</button>
+                <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 sm:pt-4">
+                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium">Make By: <span class="text-indigo-600 font-bold">Thai Minh</span></p>
+                    <button onclick="closeGlobalNotiPopup()" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-white text-[10px] sm:text-xs font-bold shadow-md transition active:scale-95" style="background: var(--brand-gradient);">Đã hiểu</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="toastContainer" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+    <div id="toastContainer" class="fixed bottom-20 sm:bottom-6 left-4 sm:left-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-2 sm:px-0"></div>
 
     <script>
         const FIREBASE_DB_URL = "https://tailieuontap8-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -787,11 +800,12 @@
             window.addEventListener("resize", updateTabScrollShadows);
             setTimeout(updateTabScrollShadows, 100);
             
+            // Tăng thời gian đồng bộ lên 10s để tránh bị nháy liên tục
             setInterval(() => {
                 syncFromFirebase(false); 
                 checkAndPurgeExpiredDocuments(); 
                 updateLiveCountdowns();
-            }, 7000);
+            }, 10000);
         });
 
         // ========== AUDIO SYSTEM ==========
@@ -834,16 +848,14 @@
                     osc.start(now);
                     osc.stop(now + 0.2);
                 }
-            } catch (e) {
-                console.log("Audio not supported or blocked", e);
-            }
+            } catch (e) {}
         }
 
         function setSoundProfile(profile) {
             currentSoundProfile = profile;
             localStorage.setItem(LOCAL_STORAGE_SOUND_KEY, profile);
             updateSoundSwatchBorder();
-            playSound('click'); // Preview sound
+            playSound('click');
         }
 
         function updateSoundSwatchBorder() {
@@ -1342,12 +1354,42 @@
                 const res = await fetch(`${FIREBASE_DB_URL}/notifications.json?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
-                    notificationsList = Array.isArray(data) ? data : (data && data.content ? [{ id: "old", content: data.content, type: "general", createdAt: Date.now() }] : []);
-                    saveLocalCache(); updateUnreadBadges();
+                    let parsedNotis = Array.isArray(data) ? data : (data && data.content ? [{ id: "old", content: data.content, type: "general", createdAt: Date.now() }] : []);
+                    parsedNotis.sort((a, b) => b.createdAt - a.createdAt);
+                    
+                    const prevStr = JSON.stringify(notificationsList);
+                    notificationsList = parsedNotis;
+                    const changed = JSON.stringify(notificationsList) !== prevStr;
+                    
+                    if (changed) {
+                        saveLocalCache(); 
+                        updateUnreadBadges();
+                    }
+
                     const newNotis = notificationsList.filter(n => !seenGlobalNotis.includes(n.id));
-                    if (newNotis.length > 0) showGlobalNotiPopup(newNotis[0].content, newNotis[0].id, newNotis[0].type);
+                    
+                    if (newNotis.length > 0) {
+                        // Hiện duy nhất thông báo mới nhất
+                        const latest = newNotis[0];
+                        showGlobalNotiPopup(latest.content, latest.id, latest.type);
+                        
+                        // Đánh dấu TẤT CẢ thông báo hiện tại là đã xem để không bị bật lên liên tục
+                        let markedChanged = false;
+                        notificationsList.forEach(n => {
+                            if (!seenGlobalNotis.includes(n.id)) {
+                                seenGlobalNotis.push(n.id);
+                                markedChanged = true;
+                            }
+                        });
+                        if (markedChanged) {
+                            localStorage.setItem(LOCAL_STORAGE_SEEN_GLOBAL_NOTIS_KEY, JSON.stringify(seenGlobalNotis));
+                        }
+                        updateUnreadBadges();
+                    }
+                    return changed;
                 }
             } catch (e) {}
+            return false;
         }
 
         function checkAdminReplies() {
@@ -1396,6 +1438,9 @@
                     fetch(`${FIREBASE_DB_URL}/documents.json?t=${Date.now()}`),
                     fetch(`${FIREBASE_DB_URL}/reports.json?t=${Date.now()}`)
                 ]);
+                
+                let dataChanged = false;
+                
                 if (docsRes.ok) {
                     const docsData = await docsRes.json();
                     const parsedDocs = [], parsedTrash = [];
@@ -1408,9 +1453,19 @@
                         }
                     }
                     parsedDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    studyDocuments = parsedDocs;
-                    trashDocuments = parsedTrash;
+                    
+                    const newDocsStr = JSON.stringify(parsedDocs);
+                    if (newDocsStr !== JSON.stringify(studyDocuments)) {
+                        studyDocuments = parsedDocs;
+                        dataChanged = true;
+                    }
+                    const newTrashStr = JSON.stringify(parsedTrash);
+                    if (newTrashStr !== JSON.stringify(trashDocuments)) {
+                        trashDocuments = parsedTrash;
+                        dataChanged = true;
+                    }
                 }
+                
                 if (reportsRes.ok) {
                     const reportsData = await reportsRes.json();
                     const parsedReports = [];
@@ -1418,10 +1473,25 @@
                         for (const [key, val] of Object.entries(reportsData)) { if (val && typeof val === "object") parsedReports.push({ ...val, id: key }); }
                     }
                     parsedReports.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    errorReports = parsedReports;
+                    
+                    if (JSON.stringify(parsedReports) !== JSON.stringify(errorReports)) {
+                        errorReports = parsedReports;
+                        dataChanged = true;
+                    }
                 }
-                await fetchNotifications();
-                saveLocalCache(); renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
+                
+                const notiChanged = await fetchNotifications();
+                if (notiChanged) dataChanged = true;
+                
+                saveLocalCache(); 
+                
+                // Chỉ render lại nếu có sự thay đổi thực sự để tránh nháy màn hình
+                if (dataChanged) {
+                    renderSubjectTabs(); 
+                    renderStudyMaterials(); 
+                    renderAdminLists();
+                }
+                
                 checkAdminReplies();
                 checkExpiringDocs();
             } catch (err) {}
@@ -1435,29 +1505,29 @@
             
             if (subjectId === "REPLIES") {
                 titleEl.textContent = "Phản hồi từ Admin"; subEl.textContent = "Phản hồi riêng cho thiết bị của bạn.";
-                iconBox.className = "w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="message-square" class="w-7 h-7"></i>`;
+                iconBox.className = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="message-square" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "none";
             } else if (subjectId === "ALL") {
                 titleEl.textContent = "Tất cả các môn học"; subEl.textContent = "Khám phá kho tài liệu.";
-                iconBox.className = "w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="layout-grid" class="w-7 h-7"></i>`;
+                iconBox.className = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="layout-grid" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "flex";
             } else if (subjectId === "BOOKMARKS") {
                 titleEl.textContent = "Tài liệu đã lưu"; subEl.textContent = "Các bài ôn bạn đã đánh dấu.";
-                iconBox.className = "w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="star" class="w-7 h-7"></i>`;
+                iconBox.className = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="star" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "flex";
             } else if (subjectId === "RECENT") {
                 titleEl.textContent = "Xem gần đây"; subEl.textContent = `${viewHistory.length} tài liệu đã mở.`;
-                iconBox.className = "w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="history" class="w-7 h-7"></i>`;
+                iconBox.className = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="history" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "flex";
             } else if (subjectId === "REVIEW_LATER") {
                 titleEl.textContent = "Ôn lại sau"; subEl.textContent = `${reviewLaterIds.length} tài liệu cần ôn.`;
-                iconBox.className = "w-14 h-14 rounded-2xl bg-fuchsia-50 dark:bg-fuchsia-900/30 border border-fuchsia-100 dark:border-fuchsia-800 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="bookmark-check" class="w-7 h-7"></i>`;
+                iconBox.className = "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-fuchsia-50 dark:bg-fuchsia-900/30 border border-fuchsia-100 dark:border-fuchsia-800 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 shrink-0"; iconBox.innerHTML = `<i data-lucide="bookmark-check" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "flex";
             } else {
                 const meta = getSubjectMeta(subjectId);
                 const count = studyDocuments.filter(d => d.subject === subjectId).length;
                 titleEl.textContent = `Môn: ${meta.name}`; subEl.textContent = `Hiện có ${count} tài liệu.`;
-                iconBox.className = `w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 ${meta.iconBg}`; iconBox.innerHTML = `<i data-lucide="${meta.icon}" class="w-7 h-7"></i>`;
+                iconBox.className = `w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border flex items-center justify-center shrink-0 ${meta.iconBg}`; iconBox.innerHTML = `<i data-lucide="${meta.icon}" class="w-6 h-6 sm:w-7 sm:h-7"></i>`;
                 if(sortC) sortC.style.display = "flex";
             }
             lucide.createIcons();
@@ -1522,20 +1592,20 @@
                 if (myReplies.length === 0) {
                     container.innerHTML = `<div class="py-20 flex flex-col items-center justify-center text-center"><div class="w-24 h-24 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-6 text-slate-400 dark:text-slate-500 shadow-inner"><i data-lucide="inbox" class="w-12 h-12"></i></div><h3 class="text-xl font-black text-slate-800 dark:text-white mb-2">Chưa có phản hồi nào</h3><p class="text-slate-500 dark:text-slate-400 max-w-sm text-sm">Khi bạn gửi báo lỗi và Admin phản hồi, tin nhắn sẽ xuất hiện tại đây.</p></div>`;
                 } else {
-                    container.innerHTML = `<div class="space-y-4"><div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3"><h3 class="text-xl font-black text-slate-900 dark:text-white">Hộp thư phản hồi</h3><span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${myReplies.length} tin nhắn</span></div><div class="grid grid-cols-1 gap-4">${myReplies.map(rep => `
-                        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm animate-slide-up">
+                    container.innerHTML = `<div class="space-y-4"><div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3"><h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Hộp thư phản hồi</h3><span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${myReplies.length} tin nhắn</span></div><div class="grid grid-cols-1 gap-4">${myReplies.map(rep => `
+                        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-sm animate-slide-up">
                             <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                                <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">${escapeHtml(rep.subject)}</span>
-                                <span class="text-xs text-slate-400 font-bold">${new Date(rep.createdAt).toLocaleString('vi-VN')}</span>
+                                <span class="px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">${escapeHtml(rep.subject)}</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-bold">${new Date(rep.createdAt).toLocaleString('vi-VN')}</span>
                             </div>
                             <div class="space-y-3">
-                                <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/50">
-                                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-wider mb-1.5">Bạn đã báo:</p>
-                                    <p class="text-sm text-slate-700 dark:text-slate-300">${escapeHtml(rep.content)}</p>
+                                <div class="bg-slate-50 dark:bg-slate-900/50 p-3 sm:p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                    <p class="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wider mb-1.5">Bạn đã báo:</p>
+                                    <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">${escapeHtml(rep.content)}</p>
                                 </div>
-                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                                    <p class="text-[11px] font-black text-emerald-600 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5"></i>Admin phản hồi:</p>
-                                    <p class="text-sm font-bold text-emerald-800 dark:text-emerald-300">${escapeHtml(rep.adminReply)}</p>
+                                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-3 sm:p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                                    <p class="text-[10px] sm:text-[11px] font-black text-emerald-600 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5"></i>Admin phản hồi:</p>
+                                    <p class="text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-300">${escapeHtml(rep.adminReply)}</p>
                                 </div>
                             </div>
                         </div>`).join("")}</div></div>`;
@@ -1572,7 +1642,7 @@
                     container.innerHTML = `<div class="py-20 flex flex-col items-center justify-center text-center"><div class="w-24 h-24 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-6 text-slate-400 dark:text-slate-500 shadow-inner"><i data-lucide="history" class="w-12 h-12"></i></div><h3 class="text-xl font-black text-slate-800 dark:text-white mb-2">Chưa có lịch sử</h3><p class="text-slate-500 dark:text-slate-400 max-w-sm text-sm">Các tài liệu bạn mở sẽ xuất hiện tại đây.</p></div>`;
                     lucide.createIcons(); return;
                 }
-                container.innerHTML = `<div class="space-y-4"><div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3"><h3 class="text-xl font-black text-slate-900 dark:text-white">Xem gần đây</h3><span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${filteredDocs.length} tài liệu</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${filteredDocs.map(doc => renderDocumentCard(doc, getSubjectMeta(doc.subject))).join("")}</div></div>`;
+                container.innerHTML = `<div class="space-y-4"><div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3"><h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Xem gần đây</h3><span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${filteredDocs.length} tài liệu</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${filteredDocs.map(doc => renderDocumentCard(doc, getSubjectMeta(doc.subject))).join("")}</div></div>`;
                 lucide.createIcons(); return;
             }
 
@@ -1586,15 +1656,15 @@
                     <div class="space-y-4 animate-slide-up">
                         <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
                             <div class="flex items-center gap-3 flex-wrap">
-                                <div class="w-10 h-10 rounded-xl border ${sub.iconBg} flex items-center justify-center"><i data-lucide="${sub.icon}" class="w-5 h-5"></i></div>
-                                <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">${sub.name}</h3>
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl border ${sub.iconBg} flex items-center justify-center"><i data-lucide="${sub.icon}" class="w-4 h-4 sm:w-5 sm:h-5"></i></div>
+                                <h3 class="text-base sm:text-xl font-black text-slate-900 dark:text-white">${sub.name}</h3>
                                 <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${docsForSubject.length} tài liệu</span>
                             </div>
                         </div>
                         ${docsForSubject.length === 0 ? `
-                            <div class="bg-slate-50 dark:bg-slate-800/30 rounded-3xl p-10 text-center border-2 border-slate-200 dark:border-slate-700 border-dashed flex flex-col items-center justify-center">
-                                <div class="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-4 text-slate-400"><i data-lucide="folder-open" class="w-8 h-8"></i></div>
-                                <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">Chưa có tài liệu nào trong mục này.</p>
+                            <div class="bg-slate-50 dark:bg-slate-800/30 rounded-3xl p-8 sm:p-10 text-center border-2 border-slate-200 dark:border-slate-700 border-dashed flex flex-col items-center justify-center">
+                                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-4 text-slate-400"><i data-lucide="folder-open" class="w-6 h-6 sm:w-8 sm:h-8"></i></div>
+                                <p class="text-slate-500 dark:text-slate-400 font-bold text-xs sm:text-sm">Chưa có tài liệu nào trong mục này.</p>
                             </div>
                         ` : `
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1630,41 +1700,41 @@
             return `
                 <div onclick="openStudyViewer('${doc.id}')" class="premium-card rounded-3xl flex flex-col cursor-pointer group">
                     <div class="doc-preview-strip"></div>
-                    <div class="p-5 flex flex-col gap-3 flex-1">
+                    <div class="p-4 sm:p-5 flex flex-col gap-2 sm:gap-3 flex-1">
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${subMeta.badgeClass}"><i data-lucide="${subMeta.icon}" class="w-3 h-3"></i>${subMeta.shortName}</span>
-                                <span data-expire-ts="${doc.deleteTimestamp || ''}" class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-lg"><i data-lucide="clock" class="w-3 h-3"></i><span class="countdown-label">${countdownText}</span></span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border ${subMeta.badgeClass}"><i data-lucide="${subMeta.icon}" class="w-3 h-3"></i>${subMeta.shortName}</span>
+                                <span data-expire-ts="${doc.deleteTimestamp || ''}" class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg"><i data-lucide="clock" class="w-3 h-3"></i><span class="countdown-label">${countdownText}</span></span>
                             </div>
                             <div class="flex items-center gap-0.5 shrink-0">
-                                <button onclick="toggleReviewLater(event, '${doc.id}')" title="${isReviewLater ? 'Bỏ ôn lại sau' : 'Ôn lại sau'}" class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 transition ${isReviewLater ? 'text-fuchsia-500' : 'text-slate-400 hover:text-fuchsia-500'} active:scale-90"><i data-lucide="bookmark-check" class="w-3.5 h-3.5 ${isReviewLater ? 'fill-current' : ''}"></i></button>
-                                <button onclick="toggleBookmark(event, '${doc.id}')" class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 transition ${isBookmarked ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500'} active:scale-90"><i data-lucide="star" class="w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}"></i></button>
+                                <button onclick="toggleReviewLater(event, '${doc.id}')" title="${isReviewLater ? 'Bỏ ôn lại sau' : 'Ôn lại sau'}" class="p-1 sm:p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 transition ${isReviewLater ? 'text-fuchsia-500' : 'text-slate-400 hover:text-fuchsia-500'} active:scale-90"><i data-lucide="bookmark-check" class="w-3.5 h-3.5 ${isReviewLater ? 'fill-current' : ''}"></i></button>
+                                <button onclick="toggleBookmark(event, '${doc.id}')" class="p-1 sm:p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 transition ${isBookmarked ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500'} active:scale-90"><i data-lucide="star" class="w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}"></i></button>
                             </div>
                         </div>
                         
                         <div class="flex-1">
-                            <h4 class="text-base font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition leading-tight line-clamp-2">${safeTitle}</h4>
+                            <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition leading-tight line-clamp-2">${safeTitle}</h4>
                             ${tags.length ? `<div class="flex flex-wrap gap-1 mt-1.5">${tags.map(t => `<span class="text-[9px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded">${escapeHtml(t)}</span>`).join("")}</div>` : ''}
-                            <p class="text-[11px] text-slate-500 mt-2 flex items-center gap-1.5 truncate font-medium"><i data-lucide="file-code" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i><span class="truncate">${escapeHtml(doc.fileName || "bai-on-tap.html")}</span></p>
+                            <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1.5 sm:mt-2 flex items-center gap-1.5 truncate font-medium"><i data-lucide="file-code" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0"></i><span class="truncate">${escapeHtml(doc.fileName || "bai-on-tap.html")}</span></p>
                         </div>
                         
                         ${rating.count > 0 ? `
                         <div class="flex items-center gap-1">
                             ${starsHtml}
-                            <span class="text-[10px] font-bold text-slate-500 ml-1">${rating.avg.toFixed(1)} (${rating.count})</span>
+                            <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 ml-1">${rating.avg.toFixed(1)} (${rating.count})</span>
                         </div>` : `
                         <div class="flex items-center gap-0.5">
                             ${starsHtml}
                         </div>`}
                     </div>
-                    <div class="px-5 pb-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 font-bold">
+                    <div class="px-4 sm:px-5 pb-3 sm:pb-4 pt-2 sm:pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-bold">
                             <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5"></i>${doc.views || 0}</span>
-                            <button onclick="openNotesModal('${doc.id}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}" class="p-1.5 rounded-lg ${hasNote ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-amber-100 hover:text-amber-600'} transition active:scale-90"><i data-lucide="sticky-note" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="openNotesModal('${doc.id}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}" class="p-1 sm:p-1.5 rounded-lg ${hasNote ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-amber-100 hover:text-amber-600'} transition active:scale-90"><i data-lucide="sticky-note" class="w-3.5 h-3.5"></i></button>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="event.stopPropagation(); openErrorReportModal('${doc.subject}', '${safeTitle.replace(/'/g, "\\'")}')" title="Báo lỗi" class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 transition active:scale-90"><i data-lucide="flag" class="w-3.5 h-3.5"></i></button>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 group-hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 group-hover:text-white text-[11px] font-bold transition"><span>Ôn</span><i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                            <button onclick="event.stopPropagation(); openErrorReportModal('${doc.subject}', '${safeTitle.replace(/'/g, "\\'")}')" title="Báo lỗi" class="p-1 sm:p-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 transition active:scale-90"><i data-lucide="flag" class="w-3.5 h-3.5"></i></button>
+                            <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 group-hover:bg-indigo-600 text-indigo-600 dark:text-indigo-400 group-hover:text-white text-[10px] sm:text-[11px] font-bold transition"><span>Ôn</span><i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                         </div>
                     </div>
                 </div>`;
@@ -1747,7 +1817,6 @@
 
             studyDocuments.unshift(payload); saveLocalCache(); renderSubjectTabs(); renderStudyMaterials(); renderAdminLists();
             
-            // Reset form
             document.getElementById("adminDocTitle").value = ""; document.getElementById("adminDocTags").value = ""; document.getElementById("adminHtmlFile").value = ""; document.getElementById("selectedFileName").innerHTML = `Bấm chọn file <span class="text-indigo-600">.html</span>`; document.getElementById("previewDraftBtn").disabled = true; document.getElementById("adminIsDraft").checked = false; uploadedHtmlDraft = null;
             setDefaultAdminExpirationDateTime();
             submitBtn.disabled = false; submitBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Đăng Lên Web`; lucide.createIcons();
@@ -1854,16 +1923,16 @@
                     const fileSize = getFileSize(doc.htmlContent);
                     const expiring = doc.deleteTimestamp && (Number(doc.deleteTimestamp) - Date.now()) < 2 * 24 * 60 * 60 * 1000;
                     return `
-                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border ${expiring ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'} hover:border-slate-300 dark:hover:border-slate-600 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                                <input type="checkbox" onchange="toggleDocSelection('${doc.id}')" ${isChecked ? 'checked' : ''} class="mt-1 sm:mt-0 w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer shrink-0">
+                        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border ${expiring ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'} hover:border-slate-300 dark:hover:border-slate-600 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                <input type="checkbox" onchange="toggleDocSelection('${doc.id}')" ${isChecked ? 'checked' : ''} class="mt-1 sm:mt-0 w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer shrink-0">
                                 <div class="space-y-1 min-w-0 flex-1">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${meta.badgeClass}">${escapeHtml(doc.subject)}</span>
-                                        ${doc.isDraft ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">Bản nháp</span>` : ''}
-                                        <span class="text-sm font-bold text-slate-900 dark:text-white truncate">${escapeHtml(doc.title || doc.fileName)}</span>
+                                        <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold border ${meta.badgeClass}">${escapeHtml(doc.subject)}</span>
+                                        ${doc.isDraft ? `<span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">Nháp</span>` : ''}
+                                        <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">${escapeHtml(doc.title || doc.fileName)}</span>
                                     </div>
-                                    <div class="text-[11px] text-slate-500 flex items-center gap-2.5 flex-wrap font-bold">
+                                    <div class="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-1.5 sm:gap-2.5 flex-wrap font-bold">
                                         <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i>${doc.views || 0}</span>
                                         <span class="text-slate-300">•</span>
                                         <span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3"></i>${fileSize}</span>
@@ -1872,11 +1941,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1 shrink-0 ml-8 sm:ml-0">
-                                <button onclick="copyDocTitle(event, '${doc.id}')" title="Copy tên" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 hover:bg-indigo-100 hover:text-indigo-600 transition active:scale-90"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="toggleDraftStatus('${doc.id}')" title="${doc.isDraft ? 'Công khai' : 'Ẩn (Lưu nháp)'}" class="p-2 rounded-lg ${doc.isDraft ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'} hover:bg-slate-300 dark:hover:bg-slate-600 transition shadow-sm active:scale-90"><i data-lucide="${doc.isDraft ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="openEditDocModal('${doc.id}')" title="Sửa" class="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition shadow-sm active:scale-90"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="softDelete('${doc.id}')" title="Xóa (vào thùng rác)" class="p-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition active:scale-90"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            <div class="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-6 sm:ml-0">
+                                <button onclick="copyDocTitle(event, '${doc.id}')" title="Copy tên" class="p-1.5 sm:p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 hover:bg-indigo-100 hover:text-indigo-600 transition active:scale-90"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="toggleDraftStatus('${doc.id}')" title="${doc.isDraft ? 'Công khai' : 'Ẩn (Lưu nháp)'}" class="p-1.5 sm:p-2 rounded-lg ${doc.isDraft ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'} hover:bg-slate-300 dark:hover:bg-slate-600 transition shadow-sm active:scale-90"><i data-lucide="${doc.isDraft ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="openEditDocModal('${doc.id}')" title="Sửa" class="p-1.5 sm:p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition shadow-sm active:scale-90"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="softDelete('${doc.id}')" title="Xóa" class="p-1.5 sm:p-2 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition active:scale-90"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                             </div>
                         </div>`;
                 }).join("");
@@ -1890,20 +1959,20 @@
                 
                 reportsWrapper.innerHTML = filteredReports.length === 0 ? `<div class="text-center py-12 text-slate-500 text-sm"><i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-3 text-emerald-300 dark:text-emerald-600"></i><p class="font-bold">Không có báo cáo nào.</p></div>`
                 : filteredReports.map(rep => `
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div class="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2 sm:space-y-3">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">${escapeHtml(rep.subject)}</span>
-                                ${rep.adminReply ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Đã trả lời</span>` : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Chờ xử lý</span>`}
-                                <span class="text-sm font-bold text-slate-900 dark:text-white">${escapeHtml(rep.studentName)} <span class="text-slate-400 font-medium">— ${escapeHtml(rep.studentClass)}</span></span>
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">${escapeHtml(rep.subject)}</span>
+                                ${rep.adminReply ? `<span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Đã trả lời</span>` : `<span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">Chờ xử lý</span>`}
+                                <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${escapeHtml(rep.studentName)} <span class="text-slate-400 font-medium">— ${escapeHtml(rep.studentClass)}</span></span>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="replyReport('${rep.id}', '${escapeHtml(rep.studentName)}')" class="text-[11px] px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition flex items-center gap-1 font-bold active:scale-95"><i data-lucide="message-square" class="w-3 h-3"></i>Trả lời</button>
-                                <button onclick="deleteReportById('${rep.id}')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition flex items-center gap-1 font-bold active:scale-95"><i data-lucide="check" class="w-3 h-3"></i>Xử lý</button>
+                            <div class="flex gap-1 sm:gap-2">
+                                <button onclick="replyReport('${rep.id}', '${escapeHtml(rep.studentName)}')" class="text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition flex items-center gap-1 font-bold active:scale-95"><i data-lucide="message-square" class="w-3 h-3"></i>Trả lời</button>
+                                <button onclick="deleteReportById('${rep.id}')" class="text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition flex items-center gap-1 font-bold active:scale-95"><i data-lucide="check" class="w-3 h-3"></i>Xử lý</button>
                             </div>
                         </div>
-                        <p class="text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700"><strong class="text-rose-600 dark:text-rose-400">Lỗi:</strong> ${escapeHtml(rep.content)}</p>
-                        ${rep.adminReply ? `<p class="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800"><strong>Phản hồi:</strong> ${escapeHtml(rep.adminReply)}</p>` : ''}
+                        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-2 sm:p-3 rounded-xl border border-slate-200 dark:border-slate-700"><strong class="text-rose-600 dark:text-rose-400">Lỗi:</strong> ${escapeHtml(rep.content)}</p>
+                        ${rep.adminReply ? `<p class="text-xs sm:text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 p-2 sm:p-3 rounded-xl border border-emerald-200 dark:border-emerald-800"><strong>Phản hồi:</strong> ${escapeHtml(rep.adminReply)}</p>` : ''}
                     </div>`).join("");
             }
 
@@ -1911,13 +1980,13 @@
             if (trashWrapper) {
                 trashWrapper.innerHTML = trashDocuments.length === 0 ? `<div class="text-center py-12 text-slate-500 text-sm"><i data-lucide="trash" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600"></i><p class="font-bold">Thùng rác trống.</p></div>`
                 : trashDocuments.map(doc => `
-                    <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="p-3 sm:p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 truncate line-through opacity-70">${escapeHtml(doc.title || doc.fileName)}</p>
+                            <p class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 truncate line-through opacity-70">${escapeHtml(doc.title || doc.fileName)}</p>
                         </div>
                         <div class="flex items-center gap-1 shrink-0 ml-0 sm:ml-4">
-                            <button onclick="restoreDoc('${doc.id}')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-xs font-bold text-emerald-600 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 transition">Khôi phục</button>
-                            <button onclick="hardDelete('${doc.id}')" class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 transition"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            <button onclick="restoreDoc('${doc.id}')" class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white dark:bg-slate-800 text-[10px] sm:text-xs font-bold text-emerald-600 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 transition">Khôi phục</button>
+                            <button onclick="hardDelete('${doc.id}')" class="p-1 sm:p-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 transition"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </div>`).join("");
             }
@@ -2017,15 +2086,28 @@
             if (view === "admin") {
                 if (!isAdminAuthenticated) return openAdminLogin();
                 document.getElementById("studyView").classList.add("hidden"); document.getElementById("adminView").classList.remove("hidden");
+                
+                // Desktop
                 document.getElementById("navAdminBtn").className = "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
                 document.getElementById("navStudyBtn").className = "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                
+                // Mobile
+                document.getElementById("mobileNavAdminBtn").className = "flex flex-col items-center justify-center w-full h-full text-indigo-600 dark:text-indigo-400 transition";
+                document.getElementById("mobileNavStudyBtn").className = "flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 transition";
+
                 renderAdminLists();
                 renderAnalytics();
                 checkExpiringDocs();
             } else {
                 document.getElementById("adminView").classList.add("hidden"); document.getElementById("studyView").classList.remove("hidden");
+                
+                // Desktop
                 document.getElementById("navStudyBtn").className = "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
                 document.getElementById("navAdminBtn").className = "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                
+                // Mobile
+                document.getElementById("mobileNavStudyBtn").className = "flex flex-col items-center justify-center w-full h-full text-indigo-600 dark:text-indigo-400 transition";
+                document.getElementById("mobileNavAdminBtn").className = "flex flex-col items-center justify-center w-full h-full text-slate-500 dark:text-slate-400 transition";
             }
         }
 
@@ -2035,25 +2117,24 @@
             const docsList = document.getElementById("adminDocsListWrapper"), reportsList = document.getElementById("adminReportsListWrapper"), trashList = document.getElementById("adminTrashListWrapper");
             const docsFilter = document.getElementById("adminDocsFilter"), reportsFilter = document.getElementById("adminReportsFilter");
             
-            // Reset classes
-            docsBtn.className = "px-4 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition";
-            reportsBtn.className = "px-4 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition flex items-center gap-2";
-            trashBtn.className = "px-4 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition";
+            docsBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 transition";
+            reportsBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 transition flex justify-center items-center gap-1 sm:gap-2";
+            trashBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 transition";
             docsList.classList.add("hidden"); reportsList.classList.add("hidden"); trashList.classList.add("hidden");
             
             if (tab === "reports") {
                 reportsList.classList.remove("hidden");
                 reportsFilter.classList.remove("hidden"); reportsFilter.classList.add("flex");
                 docsFilter.classList.add("hidden");
-                reportsBtn.className = "px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition flex items-center gap-2";
+                reportsBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition flex justify-center items-center gap-1 sm:gap-2";
             } else if (tab === "trash") {
                 trashList.classList.remove("hidden");
                 docsFilter.classList.add("hidden"); reportsFilter.classList.add("hidden"); reportsFilter.classList.remove("flex");
-                trashBtn.className = "px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
+                trashBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
             } else {
                 docsList.classList.remove("hidden");
                 docsFilter.classList.remove("hidden"); reportsFilter.classList.add("hidden"); reportsFilter.classList.remove("flex");
-                docsBtn.className = "px-4 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
+                docsBtn.className = "flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition";
             }
         }
 
@@ -2068,8 +2149,8 @@
             };
             const c = config[type] || config.info;
             const toast = document.createElement("div"); 
-            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl text-sm font-bold transition-all duration-300 animate-slide-up ${c.border} ${c.bg} ${c.text}`;
-            toast.innerHTML = `<i data-lucide="${c.icon}" class="w-5 h-5 shrink-0"></i><span>${escapeHtml(message)}</span>`; 
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl text-xs sm:text-sm font-bold transition-all duration-300 animate-slide-up ${c.border} ${c.bg} ${c.text}`;
+            toast.innerHTML = `<i data-lucide="${c.icon}" class="w-4 h-4 sm:w-5 sm:h-5 shrink-0"></i><span>${escapeHtml(message)}</span>`; 
             container.appendChild(toast); lucide.createIcons();
             setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateY(10px)"; setTimeout(() => toast.remove(), 300); }, 3400);
         }
@@ -2091,10 +2172,10 @@
             const navAdminBtn = document.getElementById("navAdminBtn");
             if (isAdminAuthenticated) {
                 navAdminBtn.onclick = () => switchMainView('admin');
-                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span class="hidden sm:inline">Admin</span>`;
+                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Admin</span>`;
             } else {
                 navAdminBtn.onclick = openAdminLogin;
-                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span class="hidden sm:inline">Admin</span>`;
+                navAdminBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Admin</span>`;
             }
             lucide.createIcons(); renderAdminLists();
         }
